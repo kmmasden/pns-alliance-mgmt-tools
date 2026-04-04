@@ -181,12 +181,12 @@ select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t
 /* table */
 .table-wrap { margin:0 28px 40px; background:var(--bg2); border:1px solid var(--border); border-radius:var(--r-lg); overflow:hidden; }
 .t-head {
-  display:grid; grid-template-columns:90px 1fr 110px 100px 80px 120px 110px 90px;
+  display:grid; grid-template-columns:90px 1fr 110px 80px 120px 130px 80px 90px;
   padding:10px 18px; border-bottom:1px solid var(--border); gap:12px;
 }
 .th { font-family:var(--ff-l); font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--t3); }
 .state-row {
-  display:grid; grid-template-columns:90px 1fr 110px 100px 80px 120px 110px 90px;
+  display:grid; grid-template-columns:90px 1fr 110px 80px 120px 130px 80px 90px;
   padding:13px 18px; border-bottom:1px solid var(--border); gap:12px;
   align-items:center; cursor:pointer; transition:background .15s;
   animation:rowIn .25s ease both;
@@ -220,18 +220,33 @@ select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t
 .bp { background:var(--blue-dim); border-color:rgba(74,158,255,.22); color:var(--blue); }
 
 /* empty */
-.group-header {
+.farm-tag {
+  display:inline-flex; align-items:center; gap:5px;
+  background:rgba(139,92,246,.15); border:1px solid rgba(139,92,246,.35);
+  color:#a78bfa; font-family:var(--ff-l); font-size:11px; font-weight:600;
+  padding:3px 8px; border-radius:4px; white-space:nowrap;
+  max-width:110px; overflow:hidden; text-overflow:ellipsis;
+}
+.farm-tag svg { width:11px; height:11px; stroke:currentColor; fill:none; stroke-width:2; flex-shrink:0; }
+
   display:flex; align-items:center; justify-content:space-between;
   padding:10px 18px; background:var(--bg3);
   border-bottom:1px solid var(--border); cursor:pointer;
   user-select:none; transition:background .15s;
 }
+.group-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 18px; background:var(--bg3);
+  border-bottom:1px solid var(--border); cursor:pointer;
+  user-select:none; transition:background .15s;
+  width:100%; gap:12px; flex-wrap:nowrap;
+}
 .group-header:hover { background:var(--bg4); }
-.group-header-left { display:flex; align-items:center; gap:10px; }
+.group-header-left { display:flex; align-items:center; gap:10px; flex:1; min-width:0; flex-wrap:wrap; }
 .group-label { font-family:var(--ff-l); font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--t2); }
-.group-range { font-family:var(--ff-d); font-size:15px; font-weight:600; color:var(--t1); }
-.group-count { font-family:var(--ff-l); font-size:11px; color:var(--t3); }
-.group-chevron { color:var(--t3); transition:transform .2s; }
+.group-range { font-family:var(--ff-d); font-size:15px; font-weight:600; color:var(--t1); white-space:nowrap; }
+.group-count { font-family:var(--ff-l); font-size:11px; color:var(--t3); white-space:nowrap; }
+.group-chevron { color:var(--t3); transition:transform .2s; flex-shrink:0; }
 .group-chevron svg { width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2.5; display:block; }
 .group-chevron.open { transform:rotate(90deg); }
 .group-body { display:none; }
@@ -459,12 +474,7 @@ select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t
         <option value="avoid">Avoid</option>
         <option value="unknown">Unknown</option>
       </select>
-      <select class="fsel" id="phaseFilter" onchange="render()">
-        <option value="">All phases</option>
-        <option value="early">Early game</option>
-        <option value="mid">Mid game</option>
-        <option value="late">Late game</option>
-      </select>
+
       <button class="btn btn-ghost btn-sm" onclick="openRangeModal()">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add range
@@ -506,12 +516,12 @@ select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t
   <div class="table-wrap">
     <div class="t-head">
       <div class="th">State</div>
-      <div class="th">Name / Alliance</div>
+      <div class="th">Name</div>
       <div class="th">Viability</div>
-      <div class="th">Phase</div>
       <div class="th">Age</div>
       <div class="th">Top power</div>
-      <div class="th">Mig. cost</div>
+      <div class="th">Farm</div>
+      <div class="th">Notes</div>
       <div class="th"></div>
     </div>
     <div id="serverRows"></div>
@@ -526,7 +536,15 @@ select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t
         <div class="d-num" id="dNum">—</div>
         <div class="d-name" id="dName">—</div>
       </div>
-      <div id="dBadge"></div>
+      <div id="dBadge">
+        <select id="dViaSel" onchange="saveViability()" style="appearance:none;-webkit-appearance:none;border:1px solid;border-radius:4px;padding:4px 10px;font-family:var(--ff-l);font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;cursor:pointer;outline:none;background:transparent">
+          <option value="unknown">Unknown</option>
+          <option value="viable">Viable</option>
+          <option value="monitor">Monitor</option>
+          <option value="avoid">Avoid</option>
+        </select>
+        <div style="font-family:var(--ff-l);font-size:10px;color:var(--t3);letter-spacing:.3px;margin-top:3px;text-align:center">click to change</div>
+      </div>
       <button class="icon-btn" onclick="closeDetail()">
         <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
@@ -536,18 +554,32 @@ select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t
         <div class="d-sec-title">State intel</div>
         <div class="d-grid">
           <div class="d-fld"><label>Age</label><div class="val" id="dAge">—</div></div>
-          <div class="d-fld"><label>Phase</label><div class="val" id="dPhaseV">—</div></div>
           <div class="d-fld"><label>Top alliance</label><div class="val" id="dAlly">—</div></div>
           <div class="d-fld"><label>Top power</label><div class="val" id="dPow">—</div></div>
-          <div class="d-fld full"><label>NAP / War status</label><div class="val" id="dNap">—</div></div>
+          <div class="d-fld full"><label>NAP / War status</label>
+            <select id="dNap" onchange="saveNap()" style="appearance:none;-webkit-appearance:none;width:100%;padding:7px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--t1);font-family:var(--ff-b);font-size:13px;outline:none;cursor:pointer">
+              <option value="">— Select —</option>
+              <option value="no_nap">No NAP / Pirates</option>
+              <option value="full_nap">Full State NAP</option>
+              <option value="nap_req">NAP Alliances with requirements</option>
+            </select>
+          </div>
         </div>
       </div>
       <div class="d-sec">
         <div class="d-sec-title">Migration</div>
         <div class="d-grid">
-          <div class="d-fld"><label>Cost (gems)</label><div class="val" id="dCost">—</div></div>
           <div class="d-fld full"><label>Requirements</label><div class="val" id="dReqs">—</div></div>
         </div>
+      </div>
+      <div class="d-sec">
+        <div class="d-sec-title">Farm recon</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="text" id="dFarm" placeholder="Farm account name..." style="flex:1;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--t1);font-family:var(--ff-b);font-size:13px;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='var(--border)'" />
+          <button class="btn btn-sm" style="background:rgba(139,92,246,.15);border-color:rgba(139,92,246,.35);color:#a78bfa;flex-shrink:0" onclick="saveFarm()">Assign</button>
+          <button class="btn btn-sm btn-ghost" onclick="clearFarm()" title="Remove farm">✕</button>
+        </div>
+        <div id="dFarmTag" style="margin-top:8px"></div>
       </div>
       <div class="d-sec">
         <div class="d-sec-title">Notes</div>
@@ -589,9 +621,7 @@ select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t
       <div class="ff"><label>Viability</label>
         <select id="fVia"><option value="unknown">Unknown</option><option value="viable">Viable</option><option value="monitor">Monitor</option><option value="avoid">Avoid</option></select>
       </div>
-      <div class="ff"><label>Game phase</label>
-        <select id="fPhase"><option value="">Unknown</option><option value="early">Early game</option><option value="mid">Mid game</option><option value="late">Late game</option></select>
-      </div>
+
       <div class="ff full">
         <label>State age (days) <span id="fAgeAuto" style="font-size:10px;color:var(--accent);letter-spacing:.5px;font-weight:400;margin-left:6px"></span></label>
         <input type="number" id="fAge" placeholder="Auto-calculated from state #" oninput="onAgeInput()" />
@@ -599,10 +629,18 @@ select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t
       <div class="m-sep">Alliance intel</div>
       <div class="ff"><label>Top alliance</label><input type="text" id="fAlly" placeholder="e.g. [WAR] Iron Wolves" /></div>
       <div class="ff"><label>Top power</label><input type="text" id="fPow" placeholder="e.g. 850M" /></div>
-      <div class="ff full"><label>NAP / War status</label><input type="text" id="fNap" placeholder="e.g. 3-way NAP, active border war south" /></div>
+      <div class="ff full"><label>NAP / War status</label>
+        <select id="fNap">
+          <option value="">— Select —</option>
+          <option value="no_nap">No NAP / Pirates</option>
+          <option value="full_nap">Full State NAP</option>
+          <option value="nap_req">NAP Alliances with requirements</option>
+        </select>
+      </div>
       <div class="m-sep">Migration</div>
-      <div class="ff"><label>Cost (gems)</label><input type="number" id="fCost" placeholder="e.g. 50000" /></div>
       <div class="ff"><label>Requirements</label><input type="text" id="fReqs" placeholder="e.g. Day 30+, 500k power" /></div>
+      <div class="m-sep">Farm recon</div>
+      <div class="ff full"><label>Farm account name</label><input type="text" id="fFarm" placeholder="Farm account name..." /></div>
       <div class="ff full"><label>Notes</label><textarea id="fNotes" rows="3" placeholder="Initial observations..."></textarea></div>
     </div>
     <div class="m-err" id="mErr"></div>
@@ -654,6 +692,10 @@ select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t
           <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;margin-right:6px"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
           Paste text
         </button>
+        <button class="import-tab" id="tabReddit" onclick="switchTab('reddit')">
+          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;margin-right:6px"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          Reddit search
+        </button>
       </div>
     </div>
 
@@ -681,6 +723,22 @@ select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t
           placeholder="Paste scouting info — Discord messages, Reddit posts, notes...&#10;&#10;e.g. 'State 1107 — top alliance [WAR] sitting at 920M power, opened ~3 weeks ago, heavy war zone north, migration 45k gems, requires day 30+...'"
           onfocus="this.style.borderColor='rgba(0,217,163,.4)'"
           onblur="this.style.borderColor='var(--border)'"></textarea>
+      </div>
+
+      <!-- reddit panel -->
+      <div id="panelReddit" style="display:none">
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <input type="text" id="redditQuery" placeholder="Search r/puzzlesandsurvival — e.g. state 1107"
+            style="flex:1;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--t1);font-family:var(--ff-b);font-size:13px;outline:none"
+            onfocus="this.style.borderColor='rgba(0,217,163,.4)'" onblur="this.style.borderColor='var(--border)'"
+            onkeydown="if(event.key==='Enter') searchReddit()" />
+          <button class="btn btn-ghost" onclick="searchReddit()" id="btnRedditSearch">
+            <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Search
+          </button>
+        </div>
+        <div id="redditStatus" style="display:none;font-family:var(--ff-l);font-size:12px;padding:8px 12px;border-radius:var(--r);margin-bottom:10px"></div>
+        <div id="redditResults"></div>
       </div>
 
       <button class="btn btn-primary" style="width:100%;justify-content:center;margin:14px 0" onclick="runImport()" id="btnRunImport">
@@ -768,7 +826,7 @@ function onAgeInput() {
 
 function mkState(n) {
   const est = calcAge(n);
-  return { id:mkId(), number:n, name:'', viability:'unknown', phase:'', age: est!==null?String(est):'', ageAuto:true, topAlliance:'', topPower:'', nap:'', migCost:'', migReq:'', notes:'', tags:[] };
+  return { id:mkId(), number:n, name:'', viability:'unknown', phase:'', age: est!==null?String(est):'', ageAuto:true, topAlliance:'', topPower:'', nap:'', migReq:'', notes:'', tags:[] };
 }
 
 /* init screen */
@@ -842,12 +900,10 @@ function isScounted(s) {
   return !!(
     s.name ||
     s.viability !== 'unknown' ||
-    s.phase ||
     (s.age && !s.ageAuto) ||
     s.topAlliance ||
     s.topPower ||
     s.nap ||
-    s.migCost ||
     s.migReq ||
     s.notes ||
     (s.tags && s.tags.length > 0)
@@ -866,11 +922,9 @@ function onGroupSizeChange() {
 function render() {
   const q  = (document.getElementById('searchInput')?.value||'').trim().toLowerCase();
   const vf = document.getElementById('viaFilter')?.value||'';
-  const pf = document.getElementById('phaseFilter')?.value||'';
   let list = [...states].sort((a,b)=>a.number-b.number);
   if(q)  list=list.filter(s=>String(s.number).includes(q)||(s.name||'').toLowerCase().includes(q)||(s.topAlliance||'').toLowerCase().includes(q));
   if(vf) list=list.filter(s=>s.viability===vf);
-  if(pf) list=list.filter(s=>s.phase===pf);
   document.getElementById('listLbl').textContent=list.length+' state'+(list.length!==1?'s':'')+' tracked';
   const cont=document.getElementById('serverRows');
   if(!list.length){
@@ -879,13 +933,12 @@ function render() {
   }
   const vMap={viable:'bv',monitor:'bm',avoid:'ba',unknown:'bu'};
   const vLbl={viable:'Viable',monitor:'Monitor',avoid:'Avoid',unknown:'Unknown'};
-  const pLbl={early:'Early',mid:'Mid',late:'Late'};
 
   // Skip grouping when filters/search are active, list is small, or grouping disabled
-  const useGroups = !q && !vf && !pf && GROUP_SIZE > 0 && list.length > GROUP_SIZE;
+  const useGroups = !q && !vf && GROUP_SIZE > 0 && list.length > GROUP_SIZE;
 
   if (!useGroups) {
-    cont.innerHTML = list.map((s,i) => rowHtml(s, i, vMap, vLbl, pLbl)).join('');
+    cont.innerHTML = list.map((s,i) => rowHtml(s, i, vMap, vLbl)).join('');
     return;
   }
 
@@ -906,20 +959,24 @@ function render() {
     const scoutedPill = scoutedCount > 0
       ? `<span style="font-family:var(--ff-l);font-size:11px;color:var(--accent);background:var(--accent-dim);border:1px solid rgba(0,217,163,.25);border-radius:4px;padding:2px 8px;letter-spacing:.3px">${scoutedCount}/${chunk.length} scouted</span>`
       : `<span style="font-family:var(--ff-l);font-size:11px;color:var(--t3)">0/${chunk.length} scouted</span>`;
+    const farmCount = chunk.filter(s => s.farm && s.farm.trim()).length;
+    const farmPill = farmCount > 0
+      ? `<span style="font-family:var(--ff-l);font-size:11px;color:#a78bfa;background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.35);border-radius:4px;padding:2px 8px;letter-spacing:.3px">${farmCount} farm${farmCount>1?'s':''}</span>`
+      : '';
     html += `
-      <div class="group-header" onclick="toggleGroup('${gid}')">
-        <div class="group-header-left">
-          <div class="group-range">${pad(first)} — ${pad(last)}</div>
-          <div class="group-count">${chunk.length} states</div>
-          ${scoutedPill}
-          <div style="display:flex;gap:4px;align-items:center">${pills}</div>
-        </div>
-        <div class="group-chevron${isOpen?' open':''}" id="chev_${gid}">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      <div style="display:grid;grid-template-columns:90px 1fr 110px 80px 120px 130px 80px 90px;width:100%;border-bottom:1px solid var(--border);background:var(--bg3);cursor:pointer;transition:background .15s;padding:10px 18px;box-sizing:border-box;gap:12px;align-items:center" onclick="toggleGroup('${gid}')" onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">
+        <span style="font-family:var(--ff-d);font-size:15px;font-weight:600;color:var(--t1);white-space:nowrap;grid-column:1">${pad(first)} — ${pad(last)}</span>
+        <span style="grid-column:3;display:flex;gap:4px;align-items:center">${pills}</span>
+        <span style="grid-column:4/6">${scoutedPill}</span>
+        <span style="grid-column:6">${farmPill}</span>
+        <div style="grid-column:8;display:flex;align-items:center;justify-content:flex-end;gap:6px">
+          <div class="group-chevron${isOpen?' open':''}" id="chev_${gid}" style="flex-shrink:0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;display:block"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
         </div>
       </div>
       <div class="group-body${isOpen?' open':''}" id="${gid}">
-        ${chunk.map((s,j) => rowHtml(s, i+j, vMap, vLbl, pLbl)).join('')}
+        ${chunk.map((s,j) => rowHtml(s, i+j, vMap, vLbl)).join('')}
       </div>`;
   }
   cont.innerHTML = html;
@@ -935,16 +992,16 @@ function toggleGroup(gid) {
   if (isOpen) collapsedGroups.delete(gid+'_open'); else collapsedGroups.add(gid+'_open');
 }
 
-function rowHtml(s, i, vMap, vLbl, pLbl) {
+function rowHtml(s, i, vMap, vLbl) {
   return `
     <div class="state-row${s.id===activeId?' selected':''}" onclick="openDetail('${s.id}')" style="animation-delay:${Math.min(i*.015,.3)}s">
       <div class="srv-num">${pad(s.number)}</div>
       <div class="srv-name">${s.name?esc(s.name):'<span style="color:var(--t3);font-style:italic">—</span>'}${s.topAlliance?`<span class="srv-sub">${esc(s.topAlliance)}</span>`:''}</div>
       <div><span class="badge ${vMap[s.viability||'unknown']}">${vLbl[s.viability||'unknown']}</span></div>
-      <div>${s.phase?`<span class="badge bp">${pLbl[s.phase]}</span>`:'<span style="color:var(--t3)">—</span>'}</div>
       <div class="pval">${s.age?s.age+'d'+(s.ageAuto?'<span style="color:var(--t3);font-size:10px"> est</span>':''):'<span style="color:var(--t3)">—</span>'}</div>
       <div class="pval">${s.topPower||'<span style="color:var(--t3)">—</span>'}</div>
-      <div class="pval">${s.migCost?Number(s.migCost).toLocaleString()+' gems':'<span style="color:var(--t3)">—</span>'}</div>
+      <div>${s.farm?`<span class="farm-tag"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>${esc(s.farm)}</span>`:'<span style="color:var(--t3)">—</span>'}</div>
+            <div>${s.notes?`<button class="btn btn-sm" onclick="event.stopPropagation();openDetail('${s.id}')" style="padding:3px 10px;font-size:11px;background:rgba(255,255,255,0.05);border-color:var(--border2);color:var(--t2)">Notes</button>`:''}</div>
       <div class="row-acts">
         <button class="icon-btn" onclick="event.stopPropagation();openEditModal('${s.id}')" title="Edit">
           <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -963,21 +1020,67 @@ function openDetail(id) {
   activeId=id; render();
   const vMap={viable:'bv',monitor:'bm',avoid:'ba',unknown:'bu'};
   const vLbl={viable:'Viable',monitor:'Monitor',avoid:'Avoid',unknown:'Unknown'};
-  const pLbl={early:'Early game',mid:'Mid game',late:'Late game'};
   document.getElementById('dNum').textContent  =pad(s.number);
   document.getElementById('dName').textContent = s.name||'Unnamed state';
-  document.getElementById('dBadge').innerHTML  =`<span class="badge ${vMap[s.viability||'unknown']}">${vLbl[s.viability||'unknown']}</span>`;
+  styleViaSelect(s.viability||'unknown');
   document.getElementById('dAge').textContent  = s.age?s.age+' days'+(s.ageAuto?' (est.)':''):'—';
-  document.getElementById('dPhaseV').textContent=s.phase?pLbl[s.phase]:'—';
   document.getElementById('dAlly').textContent = s.topAlliance||'—';
   document.getElementById('dPow').textContent  = s.topPower||'—';
-  document.getElementById('dNap').textContent  = s.nap||'—';
-  document.getElementById('dCost').textContent = s.migCost?Number(s.migCost).toLocaleString()+' gems':'—';
+  document.getElementById('dNap').value = s.nap||'';
   document.getElementById('dReqs').textContent = s.migReq||'—';
   document.getElementById('dNotes').value      = s.notes||'';
+  document.getElementById('dFarm').value       = s.farm||'';
+  renderFarmTag(s);
   document.getElementById('saveMsg').style.opacity=0;
   renderTags(s);
   document.getElementById('dOverlay').classList.add('open');
+}
+
+const viaStyles = {
+  viable:  { color:'#00d9a3', bg:'rgba(0,217,163,0.12)',  border:'rgba(0,217,163,0.4)' },
+  monitor: { color:'#f0a430', bg:'rgba(240,164,48,0.13)', border:'rgba(240,164,48,0.4)' },
+  avoid:   { color:'#e84545', bg:'rgba(232,69,69,0.12)',  border:'rgba(232,69,69,0.4)' },
+  unknown: { color:'var(--t3)', bg:'rgba(255,255,255,0.04)', border:'var(--border2)' },
+};
+function styleViaSelect(v) {
+  const sel = document.getElementById('dViaSel');
+  if (!sel) return;
+  sel.value = v;
+  const st = viaStyles[v] || viaStyles.unknown;
+  sel.style.color = st.color;
+  sel.style.background = st.bg;
+  sel.style.borderColor = st.border;
+}
+function saveNap() {
+  const s = states.find(x=>x.id===activeId); if(!s) return;
+  s.nap = document.getElementById('dNap').value;
+  save(); render();
+}
+function saveViability() {
+  const s = states.find(x=>x.id===activeId); if(!s) return;
+  s.viability = document.getElementById('dViaSel').value;
+  styleViaSelect(s.viability);
+  save(); renderStats(); render();
+}
+
+function renderFarmTag(s) {
+  const wrap = document.getElementById('dFarmTag');
+  if (!wrap) return;
+  wrap.innerHTML = s.farm
+    ? `<span class="farm-tag"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>${esc(s.farm)}</span>`
+    : '<span style="font-size:12px;color:var(--t3)">No farm assigned</span>';
+}
+function saveFarm() {
+  const s = states.find(x=>x.id===activeId); if(!s) return;
+  const val = document.getElementById('dFarm').value.trim();
+  s.farm = val;
+  save(); renderFarmTag(s); render();
+}
+function clearFarm() {
+  const s = states.find(x=>x.id===activeId); if(!s) return;
+  s.farm = '';
+  document.getElementById('dFarm').value = '';
+  save(); renderFarmTag(s); render();
 }
 
 function renderTags(s) {
@@ -1021,10 +1124,9 @@ function openAddModal() {
   editingId=null; ageWasAuto=false;
   document.getElementById('fAgeAuto').textContent='';
   document.getElementById('mTitle').textContent='Add state';
-  ['fNum','fName','fAlly','fPow','fNap','fCost','fReqs','fAge'].forEach(id=>document.getElementById(id).value='');
+  ['fNum','fName','fAlly','fPow','fNap','fReqs','fAge','fFarm'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('fNotes').value='';
   document.getElementById('fVia').value='unknown';
-  document.getElementById('fPhase').value='';
   document.getElementById('mErr').textContent='';
   document.getElementById('svrModal').classList.add('open');
   setTimeout(()=>document.getElementById('fNum').focus(),80);
@@ -1037,12 +1139,11 @@ function openEditModal(id) {
   document.getElementById('fNum').value=s.number||'';
   document.getElementById('fName').value=s.name||'';
   document.getElementById('fVia').value=s.viability||'unknown';
-  document.getElementById('fPhase').value=s.phase||'';
   document.getElementById('fAge').value=s.age||'';
   document.getElementById('fAlly').value=s.topAlliance||'';
   document.getElementById('fPow').value=s.topPower||'';
   document.getElementById('fNap').value=s.nap||'';
-  document.getElementById('fCost').value=s.migCost||'';
+  document.getElementById('fFarm').value=s.farm||'';
   document.getElementById('fReqs').value=s.migReq||'';
   document.getElementById('fNotes').value=s.notes||'';
   document.getElementById('mErr').textContent='';
@@ -1055,11 +1156,12 @@ function saveState() {
   if(!editingId&&states.find(s=>s.number===num)){document.getElementById('mErr').textContent='State '+num+' is already in your list.';return;}
   const data={
     number:num, name:document.getElementById('fName').value.trim(),
-    viability:document.getElementById('fVia').value, phase:document.getElementById('fPhase').value,
+    viability:document.getElementById('fVia').value,
     age:document.getElementById('fAge').value.trim(), ageAuto:ageWasAuto,
     topAlliance:document.getElementById('fAlly').value.trim(),
     topPower:document.getElementById('fPow').value.trim(), nap:document.getElementById('fNap').value.trim(),
-    migCost:document.getElementById('fCost').value.trim(), migReq:document.getElementById('fReqs').value.trim(),
+    farm:document.getElementById('fFarm').value.trim(),
+    migReq:document.getElementById('fReqs').value.trim(),
     notes:document.getElementById('fNotes').value.trim(),
   };
   if(editingId){const i=states.findIndex(s=>s.id===editingId);if(i>-1)states[i]={...states[i],...data};}
@@ -1081,6 +1183,9 @@ function openImportModal() {
   document.getElementById('aiStatus').className='ai-status';
   document.getElementById('imgPreviews').innerHTML='';
   document.getElementById('importText').value='';
+  document.getElementById('redditQuery').value='';
+  document.getElementById('redditResults').innerHTML='';
+  document.getElementById('redditStatus').style.display='none';
   importedResults=[];
   uploadedImages=[];
   switchTab('img');
@@ -1090,8 +1195,12 @@ function closeImportModal() { document.getElementById('importModal').classList.r
 function switchTab(tab) {
   document.getElementById('tabImg').classList.toggle('active', tab==='img');
   document.getElementById('tabTxt').classList.toggle('active', tab==='txt');
-  document.getElementById('panelImg').style.display = tab==='img' ? 'block' : 'none';
-  document.getElementById('panelTxt').style.display = tab==='txt' ? 'block' : 'none';
+  document.getElementById('tabReddit').classList.toggle('active', tab==='reddit');
+  document.getElementById('panelImg').style.display    = tab==='img'    ? 'block' : 'none';
+  document.getElementById('panelTxt').style.display    = tab==='txt'    ? 'block' : 'none';
+  document.getElementById('panelReddit').style.display = tab==='reddit' ? 'block' : 'none';
+  // hide Extract button on reddit tab — it has its own flow
+  document.getElementById('btnRunImport').style.display = tab==='reddit' ? 'none' : '';
 }
 
 let uploadedImages = [];
@@ -1124,6 +1233,82 @@ function renderThumbs() {
     </div>`).join('');
 }
 
+async function searchReddit() {
+  const q = document.getElementById('redditQuery').value.trim();
+  if (!q) return;
+  const statusEl = document.getElementById('redditStatus');
+  const resultsEl = document.getElementById('redditResults');
+  const btn = document.getElementById('btnRedditSearch');
+
+  statusEl.style.display='block';
+  statusEl.style.background='var(--accent-dim)';
+  statusEl.style.color='var(--accent)';
+  statusEl.style.border='1px solid rgba(0,217,163,.25)';
+  statusEl.textContent='Searching r/puzzlesandsurvival...';
+  resultsEl.innerHTML='';
+  btn.disabled=true;
+
+  try {
+    const url = `/api/reddit?q=${encodeURIComponent(q)}`;
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error('Reddit returned ' + resp.status);
+    const data = await resp.json();
+    const posts = data?.data?.children?.map(c=>c.data).filter(p=>p.selftext||p.title) || [];
+
+    btn.disabled=false;
+    if (!posts.length) {
+      statusEl.style.background='var(--red-dim)';
+      statusEl.style.color='var(--red)';
+      statusEl.style.border='1px solid rgba(232,69,69,.25)';
+      statusEl.textContent='No posts found. Try a different search term.';
+      return;
+    }
+
+    statusEl.textContent=`${posts.length} post${posts.length>1?'s':''} found — select one to extract state data`;
+    resultsEl.innerHTML = posts.map((p,i) => `
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .15s"
+        onmouseover="this.style.borderColor='var(--border2)'" onmouseout="this.style.borderColor='var(--border)'"
+        onclick="extractFromRedditPost(${i})">
+        <div style="font-size:13px;font-weight:500;color:var(--t1);margin-bottom:4px">${esc(p.title)}</div>
+        <div style="display:flex;gap:12px;font-family:var(--ff-l);font-size:11px;color:var(--t3)">
+          <span>u/${esc(p.author)}</span>
+          <span>${Math.round(p.score)} upvotes</span>
+          <span>${new Date(p.created_utc*1000).toLocaleDateString()}</span>
+        </div>
+        ${p.selftext ? `<div style="font-size:12px;color:var(--t2);margin-top:6px;line-height:1.5;max-height:60px;overflow:hidden">${esc(p.selftext.slice(0,200))}${p.selftext.length>200?'…':''}</div>` : ''}
+      </div>`).join('');
+
+    // store posts for extraction
+    window._redditPosts = posts;
+
+  } catch(e) {
+    btn.disabled=false;
+    statusEl.style.background='var(--red-dim)';
+    statusEl.style.color='var(--red)';
+    statusEl.style.border='1px solid rgba(232,69,69,.25)';
+    statusEl.textContent='Search failed: '+e.message;
+  }
+}
+
+async function extractFromRedditPost(idx) {
+  const post = window._redditPosts?.[idx];
+  if (!post) return;
+  const text = `Title: ${post.title}\n\nBody: ${post.selftext||'(no body)'}`;
+
+  // Switch to showing the AI status and pass through existing runImport flow
+  document.getElementById('importText').value = text;
+  switchTab('txt');
+  document.getElementById('aiStatus').className='ai-status thinking';
+  document.getElementById('aiStatusText').textContent='Extracting state data from post...';
+  document.getElementById('importResults').innerHTML='';
+  document.getElementById('importActions').style.display='none';
+  document.getElementById('btnRunImport').disabled=true;
+  document.getElementById('btnRunImport').style.display='';
+
+  // Re-use the existing runImport text flow
+  runImport();
+}
+
 async function runImport() {
   const isImgTab = document.getElementById('tabImg').classList.contains('active');
   const text     = document.getElementById('importText').value.trim();
@@ -1150,12 +1335,10 @@ Return a JSON array of objects:
   "number": <integer, required>,
   "name": <string state name or null>,
   "viability": <"viable"|"monitor"|"avoid"|"unknown">,
-  "phase": <"early"|"mid"|"late"|null>,
   "age": <integer days old or null>,
   "topAlliance": <string or null>,
   "topPower": <string like "850M" or null>,
-  "nap": <string or null>,
-  "migCost": <integer gems or null>,
+  "nap": <"no_nap"|"full_nap"|"nap_req"|null — pick closest match: no_nap=No NAP/Pirates, full_nap=Full State NAP, nap_req=NAP with requirements>,
   "migReq": <string or null>,
   "notes": <"Portal open" if Open shown, plus any other info, or null>
 }
@@ -1235,12 +1418,10 @@ function renderImportResults(results) {
         <div class="ai-result-grid">
           ${r.name?`<div class="arc-field"><span>Name</span>${esc(r.name)}</div>`:''}
           <div class="arc-field"><span>Viability</span><span class="badge ${vMap[r.viability||'unknown']}" style="font-size:10px;padding:2px 7px">${vLbl[r.viability||'unknown']}</span></div>
-          ${r.phase?`<div class="arc-field"><span>Phase</span>${r.phase}</div>`:''}
           <div class="arc-field"><span>Age</span>${ageDisplay}</div>
           ${r.topAlliance?`<div class="arc-field"><span>Top alliance</span>${esc(r.topAlliance)}</div>`:''}
           ${r.topPower?`<div class="arc-field"><span>Top power</span>${esc(r.topPower)}</div>`:''}
-          ${r.nap?`<div class="arc-field" style="grid-column:1/-1"><span>NAP / War</span>${esc(r.nap)}</div>`:''}
-          ${r.migCost?`<div class="arc-field"><span>Mig. cost</span>${Number(r.migCost).toLocaleString()} gems</div>`:''}
+          ${r.nap?`<div class="arc-field" style="grid-column:1/-1"><span>NAP / War</span>${esc({'no_nap':'No NAP / Pirates','full_nap':'Full State NAP','nap_req':'NAP Alliances with requirements'}[r.nap]||r.nap)}</div>`:''}
           ${r.migReq?`<div class="arc-field"><span>Requirements</span>${esc(r.migReq)}</div>`:''}
           ${r.notes?`<div class="arc-field" style="grid-column:1/-1"><span>Notes</span>${esc(r.notes)}</div>`:''}
         </div>
@@ -1250,6 +1431,9 @@ function renderImportResults(results) {
   document.getElementById('importActions').style.display='flex';
 }
 
+
+  const napMap = {'No NAP / Pirates':'no_nap','Full State NAP':'full_nap','NAP Alliances with requirements':'nap_req'};
+  function napVal(v) { if(!v) return ''; return napMap[v] || v; }
 function confirmImport() {
   let count = 0;
   importedResults.forEach((r, i) => {
@@ -1263,12 +1447,10 @@ function confirmImport() {
       number: r.number,
       name: r.name||'',
       viability: r.viability||'unknown',
-      phase: r.phase||'',
       age: ageVal, ageAuto: ageIsAuto,
       topAlliance: r.topAlliance||'',
       topPower: r.topPower||'',
-      nap: r.nap||'',
-      migCost: r.migCost?String(r.migCost):'',
+      nap: napVal(r.nap||''),
       migReq: r.migReq||'',
       notes: r.notes||'',
     };
