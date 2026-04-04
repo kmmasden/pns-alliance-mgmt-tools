@@ -692,10 +692,7 @@ select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t
           <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;margin-right:6px"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
           Paste text
         </button>
-        <button class="import-tab" id="tabReddit" onclick="switchTab('reddit')">
-          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;margin-right:6px"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-          Reddit search
-        </button>
+
       </div>
     </div>
 
@@ -723,25 +720,7 @@ select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t
           placeholder="Paste scouting info — Discord messages, Reddit posts, notes...&#10;&#10;e.g. 'State 1107 — top alliance [WAR] sitting at 920M power, opened ~3 weeks ago, heavy war zone north, migration 45k gems, requires day 30+...'"
           onfocus="this.style.borderColor='rgba(0,217,163,.4)'"
           onblur="this.style.borderColor='var(--border)'"></textarea>
-      </div>
-
-      <!-- reddit panel -->
-      <div id="panelReddit" style="display:none">
-        <div style="display:flex;gap:8px;margin-bottom:12px">
-          <input type="text" id="redditQuery" placeholder="Search r/puzzlesandsurvival — e.g. state 1107"
-            style="flex:1;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--t1);font-family:var(--ff-b);font-size:13px;outline:none"
-            onfocus="this.style.borderColor='rgba(0,217,163,.4)'" onblur="this.style.borderColor='var(--border)'"
-            onkeydown="if(event.key==='Enter') searchReddit()" />
-          <button class="btn btn-ghost" onclick="searchReddit()" id="btnRedditSearch">
-            <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            Search
-          </button>
-        </div>
-        <div id="redditStatus" style="display:none;font-family:var(--ff-l);font-size:12px;padding:8px 12px;border-radius:var(--r);margin-bottom:10px"></div>
-        <div id="redditResults"></div>
-      </div>
-
-      <button class="btn btn-primary" style="width:100%;justify-content:center;margin:14px 0" onclick="runImport()" id="btnRunImport">
+      </div><button class="btn btn-primary" style="width:100%;justify-content:center;margin:14px 0" onclick="runImport()" id="btnRunImport">
         <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="m9 12 2 2 4-4"/></svg>
         Extract with AI
       </button>
@@ -1183,9 +1162,6 @@ function openImportModal() {
   document.getElementById('aiStatus').className='ai-status';
   document.getElementById('imgPreviews').innerHTML='';
   document.getElementById('importText').value='';
-  document.getElementById('redditQuery').value='';
-  document.getElementById('redditResults').innerHTML='';
-  document.getElementById('redditStatus').style.display='none';
   importedResults=[];
   uploadedImages=[];
   switchTab('img');
@@ -1195,12 +1171,8 @@ function closeImportModal() { document.getElementById('importModal').classList.r
 function switchTab(tab) {
   document.getElementById('tabImg').classList.toggle('active', tab==='img');
   document.getElementById('tabTxt').classList.toggle('active', tab==='txt');
-  document.getElementById('tabReddit').classList.toggle('active', tab==='reddit');
   document.getElementById('panelImg').style.display    = tab==='img'    ? 'block' : 'none';
   document.getElementById('panelTxt').style.display    = tab==='txt'    ? 'block' : 'none';
-  document.getElementById('panelReddit').style.display = tab==='reddit' ? 'block' : 'none';
-  // hide Extract button on reddit tab — it has its own flow
-  document.getElementById('btnRunImport').style.display = tab==='reddit' ? 'none' : '';
 }
 
 let uploadedImages = [];
@@ -1231,82 +1203,6 @@ function renderThumbs() {
       <img src="${img.dataUrl}" alt="${esc(img.name)}" />
       <button class="img-thumb-del" onclick="removeImage('${img.id}')">×</button>
     </div>`).join('');
-}
-
-async function searchReddit() {
-  const q = document.getElementById('redditQuery').value.trim();
-  if (!q) return;
-  const statusEl = document.getElementById('redditStatus');
-  const resultsEl = document.getElementById('redditResults');
-  const btn = document.getElementById('btnRedditSearch');
-
-  statusEl.style.display='block';
-  statusEl.style.background='var(--accent-dim)';
-  statusEl.style.color='var(--accent)';
-  statusEl.style.border='1px solid rgba(0,217,163,.25)';
-  statusEl.textContent='Searching r/puzzlesandsurvival...';
-  resultsEl.innerHTML='';
-  btn.disabled=true;
-
-  try {
-    const url = `/api/reddit?q=${encodeURIComponent(q)}`;
-    const resp = await fetch(url);
-    if (!resp.ok) throw new Error('Reddit returned ' + resp.status);
-    const data = await resp.json();
-    const posts = data?.data?.children?.map(c=>c.data).filter(p=>p.selftext||p.title) || [];
-
-    btn.disabled=false;
-    if (!posts.length) {
-      statusEl.style.background='var(--red-dim)';
-      statusEl.style.color='var(--red)';
-      statusEl.style.border='1px solid rgba(232,69,69,.25)';
-      statusEl.textContent='No posts found. Try a different search term.';
-      return;
-    }
-
-    statusEl.textContent=`${posts.length} post${posts.length>1?'s':''} found — select one to extract state data`;
-    resultsEl.innerHTML = posts.map((p,i) => `
-      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .15s"
-        onmouseover="this.style.borderColor='var(--border2)'" onmouseout="this.style.borderColor='var(--border)'"
-        onclick="extractFromRedditPost(${i})">
-        <div style="font-size:13px;font-weight:500;color:var(--t1);margin-bottom:4px">${esc(p.title)}</div>
-        <div style="display:flex;gap:12px;font-family:var(--ff-l);font-size:11px;color:var(--t3)">
-          <span>u/${esc(p.author)}</span>
-          <span>${Math.round(p.score)} upvotes</span>
-          <span>${new Date(p.created_utc*1000).toLocaleDateString()}</span>
-        </div>
-        ${p.selftext ? `<div style="font-size:12px;color:var(--t2);margin-top:6px;line-height:1.5;max-height:60px;overflow:hidden">${esc(p.selftext.slice(0,200))}${p.selftext.length>200?'…':''}</div>` : ''}
-      </div>`).join('');
-
-    // store posts for extraction
-    window._redditPosts = posts;
-
-  } catch(e) {
-    btn.disabled=false;
-    statusEl.style.background='var(--red-dim)';
-    statusEl.style.color='var(--red)';
-    statusEl.style.border='1px solid rgba(232,69,69,.25)';
-    statusEl.textContent='Search failed: '+e.message;
-  }
-}
-
-async function extractFromRedditPost(idx) {
-  const post = window._redditPosts?.[idx];
-  if (!post) return;
-  const text = `Title: ${post.title}\n\nBody: ${post.selftext||'(no body)'}`;
-
-  // Switch to showing the AI status and pass through existing runImport flow
-  document.getElementById('importText').value = text;
-  switchTab('txt');
-  document.getElementById('aiStatus').className='ai-status thinking';
-  document.getElementById('aiStatusText').textContent='Extracting state data from post...';
-  document.getElementById('importResults').innerHTML='';
-  document.getElementById('importActions').style.display='none';
-  document.getElementById('btnRunImport').disabled=true;
-  document.getElementById('btnRunImport').style.display='';
-
-  // Re-use the existing runImport text flow
-  runImport();
 }
 
 async function runImport() {
