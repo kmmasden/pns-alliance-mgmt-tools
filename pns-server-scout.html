@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>P&S State Scout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Barlow:wght@300;400;500&family=Barlow+Condensed:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: #0b0e14;
+  color: #e8eaf0;
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+:root {
+  --bg: #0b0e14; --bg2: #111520; --bg3: #161b26; --bg4: #1c2232;
+  --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.14);
+  --accent: #00d9a3; --accent-dim: rgba(0,217,163,0.12);
+  --amber: #f0a430; --amber-dim: rgba(240,164,48,0.13);
+  --red: #e84545; --red-dim: rgba(232,69,69,0.12);
+  --blue: #4a9eff; --blue-dim: rgba(74,158,255,0.1);
+  --t1: #e8eaf0; --t2: #8a91a8; --t3: #555e78;
+  --ff-d: 'Rajdhani', sans-serif;
+  --ff-b: 'Barlow', sans-serif;
+  --ff-l: 'Barlow Condensed', sans-serif;
+  --r: 6px; --r-lg: 10px;
+}
+body::before {
+  content:''; position:fixed; inset:0;
+  background-image: linear-gradient(rgba(0,217,163,.013) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0,217,163,.013) 1px, transparent 1px);
+  background-size: 40px 40px; pointer-events:none; z-index:0;
+}
+
+/* ── INIT SCREEN ── */
+#initScreen {
+  position:fixed; inset:0; z-index:500;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--bg); padding:20px;
+}
+.init-box {
+  background:var(--bg2); border:1px solid var(--border2);
+  border-radius:16px; padding:40px 44px;
+  width:100%; max-width:480px;
+  animation:initIn .35s cubic-bezier(.4,0,.2,1);
+}
+@keyframes initIn { from{opacity:0;transform:translateY(20px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+.init-logo { display:flex; align-items:center; gap:14px; margin-bottom:28px; }
+.init-icon {
+  width:44px; height:44px;
+  background:var(--accent-dim); border:1px solid rgba(0,217,163,.3);
+  border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.init-icon svg { width:24px; height:24px; stroke:var(--accent); fill:none; stroke-width:1.8; }
+.init-wordmark { font-family:var(--ff-d); font-size:26px; font-weight:700; letter-spacing:1px; color:var(--t1); }
+.init-wordmark span { color:var(--accent); }
+.init-tagline { font-family:var(--ff-l); font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--t3); margin-top:2px; }
+.init-heading { font-family:var(--ff-d); font-size:20px; font-weight:600; color:var(--t1); margin-bottom:6px; letter-spacing:.3px; }
+.init-sub { font-size:13px; color:var(--t2); margin-bottom:28px; line-height:1.55; }
+.init-range-row { display:grid; grid-template-columns:1fr auto 1fr; gap:10px; align-items:end; margin-bottom:12px; }
+.init-range-sep { padding-bottom:10px; font-family:var(--ff-l); color:var(--t3); font-size:20px; text-align:center; }
+.i-field label { font-family:var(--ff-l); font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--t3); display:block; margin-bottom:6px; }
+.i-field input {
+  width:100%; padding:10px 12px;
+  background:var(--bg3); border:1px solid var(--border);
+  border-radius:var(--r); color:var(--t1);
+  font-family:var(--ff-d); font-size:22px; font-weight:600;
+  text-align:center; outline:none; transition:border-color .2s;
+}
+.i-field input:focus { border-color:rgba(0,217,163,.5); }
+.i-field input::placeholder { color:var(--t3); font-weight:400; font-size:16px; }
+.i-preview {
+  background:var(--bg3); border:1px solid var(--border);
+  border-radius:var(--r); padding:10px 14px;
+  font-family:var(--ff-l); font-size:13px; color:var(--t2);
+  margin-bottom:20px; min-height:38px; transition:border-color .2s;
+}
+.i-preview.valid   { border-color:rgba(0,217,163,.3); color:var(--accent); }
+.i-preview.invalid { border-color:rgba(232,69,69,.3); color:var(--red); }
+.init-actions { display:flex; flex-direction:column; gap:10px; }
+.btn-go {
+  width:100%; padding:13px;
+  background:var(--accent-dim); border:1px solid rgba(0,217,163,.4);
+  border-radius:var(--r); color:var(--accent);
+  font-family:var(--ff-l); font-size:15px; font-weight:600; letter-spacing:.8px; text-transform:uppercase;
+  cursor:pointer; transition:all .2s;
+}
+.btn-go:hover:not(:disabled) { background:rgba(0,217,163,.22); border-color:var(--accent); box-shadow:0 0 18px rgba(0,217,163,.2); }
+.btn-go:disabled { opacity:.35; cursor:not-allowed; }
+.btn-skip {
+  width:100%; padding:10px;
+  background:transparent; border:1px solid var(--border);
+  border-radius:var(--r); color:var(--t3);
+  font-family:var(--ff-l); font-size:13px; letter-spacing:.5px; text-transform:uppercase;
+  cursor:pointer; transition:all .2s;
+}
+.btn-skip:hover { background:var(--bg3); color:var(--t2); border-color:var(--border2); }
+
+/* ── MAIN APP ── */
+#appScreen { display:none; position:relative; z-index:1; }
+.header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 28px; border-bottom:1px solid var(--border);
+  background:var(--bg2); flex-wrap:wrap; gap:14px;
+  position:sticky; top:0; z-index:40;
+}
+.brand { display:flex; align-items:center; gap:12px; }
+.brand-icon {
+  width:36px; height:36px;
+  background:var(--accent-dim); border:1px solid rgba(0,217,163,.3);
+  border-radius:var(--r); display:flex; align-items:center; justify-content:center;
+}
+.brand-icon svg { width:20px; height:20px; stroke:var(--accent); fill:none; stroke-width:1.8; }
+.brand-name { font-family:var(--ff-d); font-size:22px; font-weight:700; letter-spacing:.8px; color:var(--t1); }
+.brand-name span { color:var(--accent); }
+.brand-sub { font-family:var(--ff-l); font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--t3); margin-top:1px; }
+.header-right { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.btn {
+  font-family:var(--ff-l); font-size:13px; font-weight:600; letter-spacing:.5px; text-transform:uppercase;
+  padding:8px 16px; border-radius:var(--r); cursor:pointer;
+  display:inline-flex; align-items:center; gap:6px;
+  transition:all .18s; white-space:nowrap;
+}
+.btn svg { width:14px; height:14px; flex-shrink:0; stroke:currentColor; fill:none; stroke-width:2; }
+.btn-primary { background:var(--accent-dim); border:1px solid rgba(0,217,163,.4); color:var(--accent); }
+.btn-primary:hover { background:rgba(0,217,163,.22); border-color:var(--accent); box-shadow:0 0 14px rgba(0,217,163,.2); }
+.btn-ghost { background:transparent; border:1px solid var(--border2); color:var(--t2); }
+.btn-ghost:hover { background:var(--bg3); color:var(--t1); }
+.btn-danger { background:transparent; border:1px solid rgba(232,69,69,.3); color:var(--red); }
+.btn-danger:hover { background:var(--red-dim); }
+.btn-sm { padding:6px 12px; font-size:12px; }
+
+/* stats */
+.stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; padding:24px 28px 0; }
+.stat-tile {
+  background:var(--bg2); border:1px solid var(--border); border-radius:var(--r-lg);
+  padding:16px 18px; position:relative; overflow:hidden;
+}
+.stat-tile::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--stripe, var(--t3)); }
+.stat-tile.s-green { --stripe:var(--accent); }
+.stat-tile.s-amber { --stripe:var(--amber); }
+.stat-tile.s-red   { --stripe:var(--red); }
+.stat-tile.s-blue  { --stripe:var(--blue); }
+.stat-lbl { font-family:var(--ff-l); font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--t3); margin-bottom:6px; }
+.stat-val { font-family:var(--ff-d); font-size:34px; font-weight:700; line-height:1; }
+.stat-tile.s-green .stat-val { color:var(--accent); }
+.stat-tile.s-amber .stat-val { color:var(--amber); }
+.stat-tile.s-red   .stat-val { color:var(--red); }
+.stat-tile.s-blue  .stat-val { color:var(--blue); }
+
+/* controls */
+.controls { display:flex; gap:10px; padding:18px 28px 12px; flex-wrap:wrap; align-items:center; }
+.search-wrap { position:relative; flex:1; min-width:180px; }
+.search-wrap svg { position:absolute; left:11px; top:50%; transform:translateY(-50%); width:14px; height:14px; color:var(--t3); stroke:currentColor; fill:none; stroke-width:2; pointer-events:none; }
+input.search-box {
+  width:100%; padding:9px 12px 9px 34px;
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:var(--r); color:var(--t1);
+  font-family:var(--ff-b); font-size:13px; outline:none;
+  transition:border-color .2s;
+}
+input.search-box:focus { border-color:rgba(0,217,163,.4); }
+input.search-box::placeholder { color:var(--t3); }
+select.fsel {
+  padding:9px 28px 9px 12px;
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:var(--r); color:var(--t2);
+  font-family:var(--ff-l); font-size:12px; outline:none; cursor:pointer; appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23555e78'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 10px center;
+  transition:border-color .2s;
+}
+select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t1); }
+
+/* table */
+.table-wrap { margin:0 28px 40px; background:var(--bg2); border:1px solid var(--border); border-radius:var(--r-lg); overflow:hidden; }
+.t-head {
+  display:grid; grid-template-columns:90px 1fr 110px 100px 80px 120px 110px 90px;
+  padding:10px 18px; border-bottom:1px solid var(--border); gap:12px;
+}
+.th { font-family:var(--ff-l); font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--t3); }
+.state-row {
+  display:grid; grid-template-columns:90px 1fr 110px 100px 80px 120px 110px 90px;
+  padding:13px 18px; border-bottom:1px solid var(--border); gap:12px;
+  align-items:center; cursor:pointer; transition:background .15s;
+  animation:rowIn .25s ease both;
+}
+@keyframes rowIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+.state-row:last-child { border-bottom:none; }
+.state-row:hover { background:var(--bg3); }
+.state-row.selected { background:rgba(0,217,163,.05); }
+.srv-num { font-family:var(--ff-d); font-size:15px; font-weight:600; color:var(--accent); letter-spacing:.3px; }
+.srv-name { font-size:13px; font-weight:500; color:var(--t1); }
+.srv-sub { display:block; font-size:11px; color:var(--t3); font-weight:400; margin-top:1px; }
+.pval { font-family:var(--ff-l); font-size:13px; color:var(--t2); }
+.row-acts { display:flex; gap:5px; opacity:0; transition:opacity .15s; }
+.state-row:hover .row-acts { opacity:1; }
+.icon-btn {
+  width:28px; height:28px; border-radius:5px;
+  background:transparent; border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--t3); cursor:pointer; transition:all .15s;
+}
+.icon-btn svg { width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:2; }
+.icon-btn:hover { background:rgba(255,255,255,.06); color:var(--t1); border-color:var(--border2); }
+.icon-btn.del:hover { background:var(--red-dim); color:var(--red); border-color:rgba(232,69,69,.3); }
+
+/* badges */
+.badge { display:inline-flex; align-items:center; padding:3px 9px; border-radius:4px; font-family:var(--ff-l); font-size:11px; font-weight:600; letter-spacing:.6px; text-transform:uppercase; border:1px solid; }
+.bv { background:rgba(0,217,163,.1); border-color:rgba(0,217,163,.28); color:var(--accent); }
+.bm { background:var(--amber-dim); border-color:rgba(240,164,48,.28); color:var(--amber); }
+.ba { background:var(--red-dim); border-color:rgba(232,69,69,.28); color:var(--red); }
+.bu { background:rgba(255,255,255,.04); border-color:var(--border); color:var(--t3); }
+.bp { background:var(--blue-dim); border-color:rgba(74,158,255,.22); color:var(--blue); }
+
+/* empty */
+.empty-state { text-align:center; padding:60px 20px; color:var(--t3); }
+.empty-state svg { width:40px; height:40px; opacity:.3; margin-bottom:12px; stroke:currentColor; fill:none; stroke-width:1.5; display:block; margin-left:auto; margin-right:auto; }
+.empty-state p { font-size:13px; margin-bottom:16px; }
+
+/* detail panel */
+.d-overlay { position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:200; display:none; }
+.d-overlay.open { display:block; }
+.d-panel {
+  position:fixed; top:0; right:0; bottom:0; width:460px;
+  background:var(--bg2); border-left:1px solid var(--border2);
+  z-index:201; display:flex; flex-direction:column;
+  transform:translateX(100%); transition:transform .25s cubic-bezier(.4,0,.2,1); overflow:hidden;
+}
+.d-overlay.open .d-panel { transform:translateX(0); }
+.d-head { padding:20px 22px; border-bottom:1px solid var(--border); display:flex; align-items:flex-start; gap:12px; }
+.d-ttl { flex:1; }
+.d-num { font-family:var(--ff-d); font-size:26px; font-weight:700; color:var(--t1); line-height:1; }
+.d-name { font-size:13px; color:var(--t2); margin-top:4px; }
+.d-body { flex:1; overflow-y:auto; padding:20px 22px; }
+.d-body::-webkit-scrollbar { width:4px; }
+.d-body::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+.d-sec { margin-bottom:22px; }
+.d-sec-title { font-family:var(--ff-l); font-size:10px; letter-spacing:1.8px; text-transform:uppercase; color:var(--t3); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+.d-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.d-fld label { display:block; font-family:var(--ff-l); font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:var(--t3); margin-bottom:4px; }
+.d-fld .val { font-size:13px; color:var(--t1); }
+.d-fld.full { grid-column:1/-1; }
+.notes-field {
+  width:100%; background:var(--bg3); border:1px solid var(--border);
+  border-radius:var(--r); padding:10px 12px; color:var(--t1);
+  font-family:var(--ff-b); font-size:13px; resize:vertical; min-height:90px; outline:none;
+  transition:border-color .2s;
+}
+.notes-field:focus { border-color:rgba(0,217,163,.4); }
+.tags-wrap { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.tag { display:inline-flex; align-items:center; gap:5px; background:rgba(74,158,255,.1); border:1px solid rgba(74,158,255,.2); color:var(--blue); font-family:var(--ff-l); font-size:11px; padding:3px 9px; border-radius:4px; }
+.tag-del { cursor:pointer; opacity:.6; font-size:14px; line-height:1; transition:opacity .15s; }
+.tag-del:hover { opacity:1; color:var(--red); }
+.tag-input { background:transparent; border:none; outline:none; font-size:12px; font-family:var(--ff-l); color:var(--t2); width:120px; }
+.tag-input::placeholder { color:var(--t3); }
+.d-foot { padding:14px 22px; border-top:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+.save-msg { font-family:var(--ff-l); font-size:12px; color:var(--accent); opacity:0; transition:opacity .3s; margin-right:auto; }
+
+/* modal */
+.m-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.65);
+  backdrop-filter:blur(4px); z-index:400;
+  display:none; align-items:center; justify-content:center; padding:20px;
+}
+.m-overlay.open { display:flex; }
+.modal {
+  background:var(--bg2); border:1px solid var(--border2);
+  border-radius:var(--r-lg); padding:28px;
+  width:100%; max-width:500px; max-height:90vh; overflow-y:auto;
+  animation:mIn .2s ease;
+}
+.modal.sm { max-width:400px; }
+@keyframes mIn { from{opacity:0;transform:scale(.97) translateY(8px)} to{opacity:1;transform:scale(1) translateY(0)} }
+.modal::-webkit-scrollbar { width:4px; }
+.modal::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+.m-title { font-family:var(--ff-d); font-size:20px; font-weight:700; color:var(--t1); margin-bottom:22px; display:flex; align-items:center; justify-content:space-between; }
+.m-close { background:none; border:none; color:var(--t3); cursor:pointer; font-size:20px; line-height:1; padding:2px 6px; border-radius:4px; transition:color .15s; }
+.m-close:hover { color:var(--t1); }
+.m-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.ff { display:flex; flex-direction:column; gap:6px; }
+.ff.full { grid-column:1/-1; }
+.ff label { font-family:var(--ff-l); font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--t3); }
+.ff input, .ff select, .ff textarea {
+  background:var(--bg3); border:1px solid var(--border);
+  border-radius:var(--r); padding:9px 12px; color:var(--t1);
+  font-family:var(--ff-b); font-size:13px; outline:none;
+  transition:border-color .2s; width:100%;
+}
+.ff input::placeholder, .ff textarea::placeholder { color:var(--t3); }
+.ff input:focus, .ff select:focus, .ff textarea:focus { border-color:rgba(0,217,163,.4); }
+.ff select {
+  appearance:none; cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23555e78'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 10px center; padding-right:28px;
+}
+.ff select option { background:var(--bg2); }
+.m-sep { grid-column:1/-1; font-family:var(--ff-l); font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--t3); padding-bottom:6px; border-bottom:1px solid var(--border); margin-top:6px; }
+.m-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:22px; }
+.m-err { font-family:var(--ff-l); font-size:12px; color:var(--red); margin-top:8px; min-height:16px; }
+
+/* ai import modal */
+.ai-paste-area {
+  width:100%; min-height:140px; padding:12px;
+  background:var(--bg3); border:1px solid var(--border);
+  border-radius:var(--r); color:var(--t1);
+  font-family:var(--ff-b); font-size:13px; line-height:1.6;
+  resize:vertical; outline:none; transition:border-color .2s;
+}
+.ai-paste-area:focus { border-color:rgba(0,217,163,.4); }
+.ai-paste-area::placeholder { color:var(--t3); }
+.ai-result-card {
+  background:var(--bg3); border:1px solid var(--border2);
+  border-radius:var(--r-lg); padding:14px 16px; margin-bottom:10px;
+  position:relative;
+}
+.ai-result-card .arc-num { font-family:var(--ff-d); font-size:18px; font-weight:700; color:var(--accent); margin-bottom:8px; }
+.ai-result-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px 16px; }
+.arc-field { font-size:12px; }
+.arc-field span { color:var(--t3); font-family:var(--ff-l); font-size:10px; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:1px; }
+.arc-check { position:absolute; top:12px; right:14px; width:18px; height:18px; accent-color:var(--accent); cursor:pointer; }
+.ai-status {
+  font-family:var(--ff-l); font-size:12px; letter-spacing:.4px;
+  padding:10px 14px; border-radius:var(--r); margin-bottom:14px;
+  display:none;
+}
+.ai-status.thinking { display:flex; align-items:center; gap:10px; background:var(--accent-dim); color:var(--accent); border:1px solid rgba(0,217,163,.25); }
+.ai-status.error    { display:block; background:var(--red-dim); color:var(--red); border:1px solid rgba(232,69,69,.25); }
+.ai-spinner { width:16px; height:16px; border:2px solid rgba(0,217,163,.3); border-top-color:var(--accent); border-radius:50%; animation:spin .7s linear infinite; flex-shrink:0; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.api-key-wrap { display:flex; gap:8px; align-items:center; margin-bottom:16px; }
+.api-key-wrap input { flex:1; }
+.api-key-wrap input[type=password] { font-family:monospace; letter-spacing:2px; }
+
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--bg4); border-radius:3px; }
+
+@media(max-width:700px){
+  .stats-row { grid-template-columns:repeat(2,1fr); }
+  .t-head, .state-row { grid-template-columns:80px 1fr 100px 80px; }
+  .th:nth-child(n+5), .state-row > *:nth-child(n+5) { display:none; }
+  .d-panel { width:100%; }
+  .m-grid { grid-template-columns:1fr; }
+  .init-box { padding:28px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- INIT SCREEN -->
+<div id="initScreen">
+  <div class="init-box">
+    <div class="init-logo">
+      <div class="init-icon">
+        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </div>
+      <div>
+        <div class="init-wordmark">P<span>&amp;</span>S STATE SCOUT</div>
+        <div class="init-tagline">Alliance Migration Research</div>
+      </div>
+    </div>
+    <div class="init-heading">Set up your state list</div>
+    <div class="init-sub">Enter a range of state numbers to auto-populate your tracking list with blank entries ready to be filled in. You can always add more states later.</div>
+    <div class="init-range-row">
+      <div class="i-field">
+        <label>From</label>
+        <input type="number" id="initFrom" placeholder="1" min="1" max="9999" oninput="updateInitPreview()" />
+      </div>
+      <div class="init-range-sep">—</div>
+      <div class="i-field">
+        <label>To</label>
+        <input type="number" id="initTo" placeholder="50" min="1" max="9999" oninput="updateInitPreview()" />
+      </div>
+    </div>
+    <div class="i-preview" id="initPreview">Enter a range above to preview</div>
+    <div class="init-actions">
+      <button class="btn-go" id="btnInitGo" disabled onclick="initWithRange()">Populate State List</button>
+      <button class="btn-skip" onclick="initSkip()">Skip — start with empty list</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="appScreen">
+  <header class="header">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </div>
+      <div>
+        <div class="brand-name">P<span>&amp;</span>S STATE SCOUT</div>
+        <div class="brand-sub">Alliance Migration Research</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="search-wrap" style="min-width:200px">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="search-box" type="text" id="searchInput" placeholder="Search # or name..." oninput="render()" />
+      </div>
+      <select class="fsel" id="viaFilter" onchange="render()">
+        <option value="">All viability</option>
+        <option value="viable">Viable</option>
+        <option value="monitor">Monitor</option>
+        <option value="avoid">Avoid</option>
+        <option value="unknown">Unknown</option>
+      </select>
+      <select class="fsel" id="phaseFilter" onchange="render()">
+        <option value="">All phases</option>
+        <option value="early">Early game</option>
+        <option value="mid">Mid game</option>
+        <option value="late">Late game</option>
+      </select>
+      <button class="btn btn-ghost btn-sm" onclick="openRangeModal()">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add range
+      </button>
+      <button class="btn btn-ghost btn-sm" onclick="openImportModal()" title="Paste scouting text and let AI extract state data">
+        <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 8v4l3 3"/></svg>
+        AI Import
+      </button>
+      <button class="btn btn-primary" onclick="openAddModal()">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add state
+      </button>
+    </div>
+  </header>
+
+  <div class="stats-row">
+    <div class="stat-tile s-blue"><div class="stat-lbl">Tracked</div><div class="stat-val" id="stTotal">0</div></div>
+    <div class="stat-tile s-green"><div class="stat-lbl">Viable</div><div class="stat-val" id="stViable">0</div></div>
+    <div class="stat-tile s-amber"><div class="stat-lbl">Monitor</div><div class="stat-val" id="stMonitor">0</div></div>
+    <div class="stat-tile s-red"><div class="stat-lbl">Avoid</div><div class="stat-val" id="stAvoid">0</div></div>
+  </div>
+
+  <div class="controls">
+    <span style="font-family:var(--ff-l);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3)" id="listLbl">0 states</span>
+  </div>
+
+  <div class="table-wrap">
+    <div class="t-head">
+      <div class="th">State</div>
+      <div class="th">Name / Alliance</div>
+      <div class="th">Viability</div>
+      <div class="th">Phase</div>
+      <div class="th">Age</div>
+      <div class="th">Top power</div>
+      <div class="th">Mig. cost</div>
+      <div class="th"></div>
+    </div>
+    <div id="serverRows"></div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="d-overlay" id="dOverlay" onclick="dOutside(event)">
+  <div class="d-panel" id="dPanel">
+    <div class="d-head">
+      <div class="d-ttl">
+        <div class="d-num" id="dNum">—</div>
+        <div class="d-name" id="dName">—</div>
+      </div>
+      <div id="dBadge"></div>
+      <button class="icon-btn" onclick="closeDetail()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="d-body">
+      <div class="d-sec">
+        <div class="d-sec-title">State intel</div>
+        <div class="d-grid">
+          <div class="d-fld"><label>Age</label><div class="val" id="dAge">—</div></div>
+          <div class="d-fld"><label>Phase</label><div class="val" id="dPhaseV">—</div></div>
+          <div class="d-fld"><label>Top alliance</label><div class="val" id="dAlly">—</div></div>
+          <div class="d-fld"><label>Top power</label><div class="val" id="dPow">—</div></div>
+          <div class="d-fld full"><label>NAP / War status</label><div class="val" id="dNap">—</div></div>
+        </div>
+      </div>
+      <div class="d-sec">
+        <div class="d-sec-title">Migration</div>
+        <div class="d-grid">
+          <div class="d-fld"><label>Cost (gems)</label><div class="val" id="dCost">—</div></div>
+          <div class="d-fld full"><label>Requirements</label><div class="val" id="dReqs">—</div></div>
+        </div>
+      </div>
+      <div class="d-sec">
+        <div class="d-sec-title">Notes</div>
+        <textarea class="notes-field" id="dNotes" placeholder="Add scouting notes..."></textarea>
+      </div>
+      <div class="d-sec">
+        <div class="d-sec-title">Tags</div>
+        <div class="tags-wrap" id="dTags">
+          <input class="tag-input" id="tagIn" placeholder="Type &amp; press Enter..." onkeydown="handleTag(event)" />
+        </div>
+      </div>
+    </div>
+    <div class="d-foot">
+      <span class="save-msg" id="saveMsg">&#10003; Saved</span>
+      <button class="btn btn-ghost btn-sm" onclick="openEditFromDetail()">
+        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit
+      </button>
+      <button class="btn btn-danger btn-sm" onclick="deleteFromDetail()">
+        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        Delete
+      </button>
+      <button class="btn btn-primary btn-sm" onclick="saveDetailNotes()">Save notes</button>
+    </div>
+  </div>
+</div>
+
+<!-- SERVER MODAL -->
+<div class="m-overlay" id="svrModal">
+  <div class="modal">
+    <div class="m-title">
+      <span id="mTitle">Add state</span>
+      <button class="m-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="m-grid">
+      <div class="m-sep">Identity</div>
+      <div class="ff"><label>State number *</label><input type="number" id="fNum" placeholder="e.g. 147" oninput="onNumInput()" /></div>
+      <div class="ff"><label>Nickname</label><input type="text" id="fName" placeholder="e.g. Iron Wolves home" /></div>
+      <div class="ff"><label>Viability</label>
+        <select id="fVia"><option value="unknown">Unknown</option><option value="viable">Viable</option><option value="monitor">Monitor</option><option value="avoid">Avoid</option></select>
+      </div>
+      <div class="ff"><label>Game phase</label>
+        <select id="fPhase"><option value="">Unknown</option><option value="early">Early game</option><option value="mid">Mid game</option><option value="late">Late game</option></select>
+      </div>
+      <div class="ff full">
+        <label>State age (days) <span id="fAgeAuto" style="font-size:10px;color:var(--accent);letter-spacing:.5px;font-weight:400;margin-left:6px"></span></label>
+        <input type="number" id="fAge" placeholder="Auto-calculated from state #" oninput="onAgeInput()" />
+      </div>
+      <div class="m-sep">Alliance intel</div>
+      <div class="ff"><label>Top alliance</label><input type="text" id="fAlly" placeholder="e.g. [WAR] Iron Wolves" /></div>
+      <div class="ff"><label>Top power</label><input type="text" id="fPow" placeholder="e.g. 850M" /></div>
+      <div class="ff full"><label>NAP / War status</label><input type="text" id="fNap" placeholder="e.g. 3-way NAP, active border war south" /></div>
+      <div class="m-sep">Migration</div>
+      <div class="ff"><label>Cost (gems)</label><input type="number" id="fCost" placeholder="e.g. 50000" /></div>
+      <div class="ff"><label>Requirements</label><input type="text" id="fReqs" placeholder="e.g. Day 30+, 500k power" /></div>
+      <div class="ff full"><label>Notes</label><textarea id="fNotes" rows="3" placeholder="Initial observations..."></textarea></div>
+    </div>
+    <div class="m-err" id="mErr"></div>
+    <div class="m-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveState()">Save state</button>
+    </div>
+  </div>
+</div>
+
+<!-- RANGE MODAL -->
+<div class="m-overlay" id="rangeModal">
+  <div class="modal sm">
+    <div class="m-title">
+      <span>Add state range</span>
+      <button class="m-close" onclick="closeRangeModal()">&times;</button>
+    </div>
+    <p style="font-size:13px;color:var(--t2);margin-bottom:20px;line-height:1.55">Add a range of state numbers. States already in your list will be skipped.</p>
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end;margin-bottom:12px">
+      <div class="ff"><label>From</label><input type="number" id="rFrom" placeholder="100" min="1" oninput="updateRangePreview()" /></div>
+      <div style="padding-bottom:10px;color:var(--t3);font-size:18px;text-align:center">—</div>
+      <div class="ff"><label>To</label><input type="number" id="rTo" placeholder="150" min="1" oninput="updateRangePreview()" /></div>
+    </div>
+    <div class="i-preview" id="rPreview">Enter a range above</div>
+    <div class="m-err" id="rErr"></div>
+    <div class="m-actions">
+      <button class="btn btn-ghost" onclick="closeRangeModal()">Cancel</button>
+      <button class="btn btn-primary" id="btnRangeAdd" onclick="addRange()" disabled>Add states</button>
+    </div>
+  </div>
+</div>
+
+<!-- AI IMPORT MODAL -->
+<div class="m-overlay" id="importModal">
+  <div class="modal" style="max-width:580px">
+    <div class="m-title">
+      <span>AI State Import</span>
+      <button class="m-close" onclick="closeImportModal()">&times;</button>
+    </div>
+    <p style="font-size:13px;color:var(--t2);margin-bottom:16px;line-height:1.6">Paste any scouting text — a Reddit post, Discord message, notes, screenshot transcript — and AI will extract state data and pre-fill the fields for you to review before importing.</p>
+
+    <div class="ff" style="margin-bottom:14px">
+      <label>Anthropic API key <span style="color:var(--t3);font-weight:400;letter-spacing:0">(stored locally, never sent anywhere except Anthropic)</span></label>
+      <div class="api-key-wrap">
+        <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off" oninput="saveApiKey()" />
+        <button class="btn btn-ghost btn-sm" onclick="toggleKeyVis()" id="btnKeyVis">Show</button>
+      </div>
+    </div>
+
+    <div class="ff" style="margin-bottom:14px">
+      <label>Paste scouting text</label>
+      <textarea class="ai-paste-area" id="importText" placeholder="e.g. 'State 1107 — top alliance [WAR] is sitting at 920M power, server opened about 3 weeks ago, heavy war zone in the north, migration costs 45k gems and requires 30 days old...'"></textarea>
+    </div>
+
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:16px" onclick="runImport()" id="btnRunImport">
+      <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="m9 12 2 2 4-4"/></svg>
+      Extract with AI
+    </button>
+
+    <div class="ai-status" id="aiStatus">
+      <div class="ai-spinner"></div>
+      <span id="aiStatusText">Analysing text...</span>
+    </div>
+
+    <div id="importResults"></div>
+
+    <div class="m-actions" id="importActions" style="display:none">
+      <button class="btn btn-ghost" onclick="closeImportModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmImport()">Import selected states</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SK = 'pns_scout_v2';
+const SK_KEY = 'pns_api_key';
+let states = [];
+let activeId = null;
+let editingId = null;
+let importedResults = [];
+
+/* storage */
+function load() {
+  try { const r = localStorage.getItem(SK); states = r ? JSON.parse(r) : null; }
+  catch(e) { states = null; }
+  if (states === null) {
+    states = [];
+    document.getElementById('initScreen').style.display = 'flex';
+    document.getElementById('appScreen').style.display = 'none';
+  } else {
+    showApp();
+  }
+  // restore api key
+  const k = localStorage.getItem(SK_KEY);
+  if (k) document.getElementById('apiKeyInput').value = k;
+}
+function save() { try { localStorage.setItem(SK, JSON.stringify(states)); } catch(e) {} }
+function saveApiKey() { try { localStorage.setItem(SK_KEY, document.getElementById('apiKeyInput').value.trim()); } catch(e) {} }
+function toggleKeyVis() {
+  const inp = document.getElementById('apiKeyInput');
+  const btn = document.getElementById('btnKeyVis');
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = 'Hide'; }
+  else { inp.type = 'password'; btn.textContent = 'Show'; }
+}
+function mkId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+/* ── AGE ESTIMATION ──
+   Linear regression on known data (R²=0.9997):
+   State 1021→250d, 1032→228d, 1033→225d,
+   1101→52d, 1102→49d, 1103→47d, 1104→45d, 1105→43d
+*/
+const AGE_SLOPE     = -2.513212463099511;
+const AGE_INTERCEPT =  2819.3925493898605;
+function calcAge(n) {
+  const num = parseInt(n);
+  if (!num || num < 1) return null;
+  const d = Math.round(AGE_SLOPE * num + AGE_INTERCEPT);
+  return d > 0 ? d : null;
+}
+
+let ageWasAuto = false;
+function onNumInput() {
+  const num = parseInt(document.getElementById('fNum').value);
+  const ageField = document.getElementById('fAge');
+  const ageLabel = document.getElementById('fAgeAuto');
+  if (!ageField.dataset.manualEdit || ageWasAuto) {
+    const est = calcAge(num);
+    if (est !== null) { ageField.value = est; ageLabel.textContent = '(auto-estimated)'; ageWasAuto = true; }
+    else { ageField.value = ''; ageLabel.textContent = ''; }
+  }
+}
+function onAgeInput() {
+  ageWasAuto = false;
+  document.getElementById('fAgeAuto').textContent = document.getElementById('fAge').value ? '(manual)' : '';
+}
+
+function mkState(n) {
+  const est = calcAge(n);
+  return { id:mkId(), number:n, name:'', viability:'unknown', phase:'', age: est!==null?String(est):'', ageAuto:true, topAlliance:'', topPower:'', nap:'', migCost:'', migReq:'', notes:'', tags:[] };
+}
+
+/* init screen */
+function updateInitPreview() {
+  const f = parseInt(document.getElementById('initFrom').value);
+  const t = parseInt(document.getElementById('initTo').value);
+  const p = document.getElementById('initPreview');
+  const b = document.getElementById('btnInitGo');
+  if (!f || !t) { p.className='i-preview'; p.textContent='Enter a range above to preview'; b.disabled=true; return; }
+  if (f<1||t<1||f>t) { p.className='i-preview invalid'; p.textContent='Invalid range — "from" must be ≤ "to"'; b.disabled=true; return; }
+  const c = t-f+1;
+  if (c>500) { p.className='i-preview invalid'; p.textContent='Range too large ('+c+' states). Maximum 500 per import.'; b.disabled=true; return; }
+  p.className='i-preview valid';
+  p.textContent='Will create '+c+' state'+(c>1?'s':'')+': '+pad(f)+' → '+pad(t);
+  b.disabled=false;
+}
+function initWithRange() {
+  const f=parseInt(document.getElementById('initFrom').value);
+  const t=parseInt(document.getElementById('initTo').value);
+  if(!f||!t||f>t||(t-f+1)>500) return;
+  for(let n=f;n<=t;n++) states.push(mkState(n));
+  save(); showApp();
+}
+function initSkip() { save(); showApp(); }
+function showApp() {
+  document.getElementById('initScreen').style.display='none';
+  document.getElementById('appScreen').style.display='block';
+  renderStats(); render();
+}
+
+/* range modal */
+function openRangeModal() { document.getElementById('rangeModal').classList.add('open'); setTimeout(()=>document.getElementById('rFrom').focus(),80); }
+function closeRangeModal() { document.getElementById('rangeModal').classList.remove('open'); }
+function updateRangePreview() {
+  const f=parseInt(document.getElementById('rFrom').value);
+  const t=parseInt(document.getElementById('rTo').value);
+  const p=document.getElementById('rPreview');
+  const b=document.getElementById('btnRangeAdd');
+  document.getElementById('rErr').textContent='';
+  if(!f||!t){p.className='i-preview';p.textContent='Enter a range above';b.disabled=true;return;}
+  if(f<1||t<1||f>t){p.className='i-preview invalid';p.textContent='Invalid range';b.disabled=true;return;}
+  const c=t-f+1;
+  if(c>500){p.className='i-preview invalid';p.textContent='Maximum 500 states per range';b.disabled=true;return;}
+  const ex=states.filter(s=>s.number>=f&&s.number<=t).length;
+  const nw=c-ex;
+  p.className= nw>0 ? 'i-preview valid' : 'i-preview invalid';
+  p.textContent=nw+' new state'+(nw!==1?'s':'')+' will be added'+(ex?' ('+ex+' already exist)':'');
+  b.disabled=nw===0;
+}
+function addRange() {
+  const f=parseInt(document.getElementById('rFrom').value);
+  const t=parseInt(document.getElementById('rTo').value);
+  if(!f||!t||f>t) return;
+  for(let n=f;n<=t;n++) if(!states.find(s=>s.number===n)) states.push(mkState(n));
+  save(); renderStats(); render(); closeRangeModal();
+}
+
+/* render */
+function pad(n){ return String(n).padStart(3,'0'); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function renderStats() {
+  document.getElementById('stTotal').textContent   = states.length;
+  document.getElementById('stViable').textContent  = states.filter(s=>s.viability==='viable').length;
+  document.getElementById('stMonitor').textContent = states.filter(s=>s.viability==='monitor').length;
+  document.getElementById('stAvoid').textContent   = states.filter(s=>s.viability==='avoid').length;
+}
+
+function render() {
+  const q  = (document.getElementById('searchInput')?.value||'').trim().toLowerCase();
+  const vf = document.getElementById('viaFilter')?.value||'';
+  const pf = document.getElementById('phaseFilter')?.value||'';
+  let list = [...states].sort((a,b)=>a.number-b.number);
+  if(q)  list=list.filter(s=>String(s.number).includes(q)||(s.name||'').toLowerCase().includes(q)||(s.topAlliance||'').toLowerCase().includes(q));
+  if(vf) list=list.filter(s=>s.viability===vf);
+  if(pf) list=list.filter(s=>s.phase===pf);
+  document.getElementById('listLbl').textContent=list.length+' state'+(list.length!==1?'s':'')+' tracked';
+  const cont=document.getElementById('serverRows');
+  if(!list.length){
+    cont.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg><p>${states.length===0?'No states yet. Add a range or an individual state to get started.':'No states match your current filters.'}</p></div>`;
+    return;
+  }
+  const vMap={viable:'bv',monitor:'bm',avoid:'ba',unknown:'bu'};
+  const vLbl={viable:'Viable',monitor:'Monitor',avoid:'Avoid',unknown:'Unknown'};
+  const pLbl={early:'Early',mid:'Mid',late:'Late'};
+  cont.innerHTML=list.map((s,i)=>`
+    <div class="state-row${s.id===activeId?' selected':''}" onclick="openDetail('${s.id}')" style="animation-delay:${Math.min(i*.015,.3)}s">
+      <div class="srv-num">${pad(s.number)}</div>
+      <div class="srv-name">${s.name?esc(s.name):'<span style="color:var(--t3);font-style:italic">—</span>'}${s.topAlliance?`<span class="srv-sub">${esc(s.topAlliance)}</span>`:''}</div>
+      <div><span class="badge ${vMap[s.viability||'unknown']}">${vLbl[s.viability||'unknown']}</span></div>
+      <div>${s.phase?`<span class="badge bp">${pLbl[s.phase]}</span>`:'<span style="color:var(--t3)">—</span>'}</div>
+      <div class="pval">${s.age?s.age+'d'+(s.ageAuto?'<span style="color:var(--t3);font-size:10px"> est</span>':''):'<span style="color:var(--t3)">—</span>'}</div>
+      <div class="pval">${s.topPower||'<span style="color:var(--t3)">—</span>'}</div>
+      <div class="pval">${s.migCost?Number(s.migCost).toLocaleString()+' gems':'<span style="color:var(--t3)">—</span>'}</div>
+      <div class="row-acts">
+        <button class="icon-btn" onclick="event.stopPropagation();openEditModal('${s.id}')" title="Edit">
+          <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="icon-btn del" onclick="event.stopPropagation();deleteState('${s.id}')" title="Delete">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </button>
+      </div>
+    </div>`).join('');
+}
+
+/* detail panel */
+function openDetail(id) {
+  const s=states.find(x=>x.id===id); if(!s) return;
+  activeId=id; render();
+  const vMap={viable:'bv',monitor:'bm',avoid:'ba',unknown:'bu'};
+  const vLbl={viable:'Viable',monitor:'Monitor',avoid:'Avoid',unknown:'Unknown'};
+  const pLbl={early:'Early game',mid:'Mid game',late:'Late game'};
+  document.getElementById('dNum').textContent  =pad(s.number);
+  document.getElementById('dName').textContent = s.name||'Unnamed state';
+  document.getElementById('dBadge').innerHTML  =`<span class="badge ${vMap[s.viability||'unknown']}">${vLbl[s.viability||'unknown']}</span>`;
+  document.getElementById('dAge').textContent  = s.age?s.age+' days'+(s.ageAuto?' (est.)':''):'—';
+  document.getElementById('dPhaseV').textContent=s.phase?pLbl[s.phase]:'—';
+  document.getElementById('dAlly').textContent = s.topAlliance||'—';
+  document.getElementById('dPow').textContent  = s.topPower||'—';
+  document.getElementById('dNap').textContent  = s.nap||'—';
+  document.getElementById('dCost').textContent = s.migCost?Number(s.migCost).toLocaleString()+' gems':'—';
+  document.getElementById('dReqs').textContent = s.migReq||'—';
+  document.getElementById('dNotes').value      = s.notes||'';
+  document.getElementById('saveMsg').style.opacity=0;
+  renderTags(s);
+  document.getElementById('dOverlay').classList.add('open');
+}
+
+function renderTags(s) {
+  const wrap=document.getElementById('dTags');
+  const inp=document.getElementById('tagIn');
+  wrap.innerHTML='';
+  (s.tags||[]).forEach((t,i)=>{
+    const el=document.createElement('span'); el.className='tag';
+    el.innerHTML=esc(t)+`<span class="tag-del" onclick="removeTag(${i})">×</span>`;
+    wrap.appendChild(el);
+  });
+  wrap.appendChild(inp);
+}
+function removeTag(idx) {
+  const s=states.find(x=>x.id===activeId); if(!s) return;
+  s.tags.splice(idx,1); save(); renderTags(s);
+}
+function handleTag(e) {
+  if(e.key!=='Enter') return; e.preventDefault();
+  const v=document.getElementById('tagIn').value.trim(); if(!v) return;
+  const s=states.find(x=>x.id===activeId); if(!s) return;
+  s.tags=s.tags||[];
+  if(!s.tags.includes(v)){s.tags.push(v);save();}
+  document.getElementById('tagIn').value=''; renderTags(s);
+}
+function saveDetailNotes() {
+  const s=states.find(x=>x.id===activeId); if(!s) return;
+  s.notes=document.getElementById('dNotes').value; save();
+  const m=document.getElementById('saveMsg'); m.style.opacity=1; setTimeout(()=>m.style.opacity=0,2000);
+}
+function closeDetail() { document.getElementById('dOverlay').classList.remove('open'); activeId=null; render(); }
+function dOutside(e) { if(e.target===document.getElementById('dOverlay')) closeDetail(); }
+function openEditFromDetail() { const id=activeId; closeDetail(); openEditModal(id); }
+function deleteFromDetail() {
+  if(!activeId||!confirm('Remove this state?')) return;
+  states=states.filter(s=>s.id!==activeId); save(); renderStats(); render(); closeDetail();
+}
+
+/* state modal */
+function openAddModal() {
+  editingId=null; ageWasAuto=false;
+  document.getElementById('fAgeAuto').textContent='';
+  document.getElementById('mTitle').textContent='Add state';
+  ['fNum','fName','fAlly','fPow','fNap','fCost','fReqs','fAge'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fNotes').value='';
+  document.getElementById('fVia').value='unknown';
+  document.getElementById('fPhase').value='';
+  document.getElementById('mErr').textContent='';
+  document.getElementById('svrModal').classList.add('open');
+  setTimeout(()=>document.getElementById('fNum').focus(),80);
+}
+function openEditModal(id) {
+  const s=states.find(x=>x.id===id); if(!s) return;
+  editingId=id; ageWasAuto=false;
+  document.getElementById('fAgeAuto').textContent=s.age?(s.ageAuto?'(auto-estimated)':'(manual)'):'';
+  document.getElementById('mTitle').textContent='Edit State '+pad(s.number);
+  document.getElementById('fNum').value=s.number||'';
+  document.getElementById('fName').value=s.name||'';
+  document.getElementById('fVia').value=s.viability||'unknown';
+  document.getElementById('fPhase').value=s.phase||'';
+  document.getElementById('fAge').value=s.age||'';
+  document.getElementById('fAlly').value=s.topAlliance||'';
+  document.getElementById('fPow').value=s.topPower||'';
+  document.getElementById('fNap').value=s.nap||'';
+  document.getElementById('fCost').value=s.migCost||'';
+  document.getElementById('fReqs').value=s.migReq||'';
+  document.getElementById('fNotes').value=s.notes||'';
+  document.getElementById('mErr').textContent='';
+  document.getElementById('svrModal').classList.add('open');
+}
+function closeModal() { document.getElementById('svrModal').classList.remove('open'); }
+function saveState() {
+  const num=parseInt(document.getElementById('fNum').value);
+  if(!num||num<1){document.getElementById('mErr').textContent='A valid state number is required.';return;}
+  if(!editingId&&states.find(s=>s.number===num)){document.getElementById('mErr').textContent='State '+num+' is already in your list.';return;}
+  const data={
+    number:num, name:document.getElementById('fName').value.trim(),
+    viability:document.getElementById('fVia').value, phase:document.getElementById('fPhase').value,
+    age:document.getElementById('fAge').value.trim(), ageAuto:ageWasAuto,
+    topAlliance:document.getElementById('fAlly').value.trim(),
+    topPower:document.getElementById('fPow').value.trim(), nap:document.getElementById('fNap').value.trim(),
+    migCost:document.getElementById('fCost').value.trim(), migReq:document.getElementById('fReqs').value.trim(),
+    notes:document.getElementById('fNotes').value.trim(),
+  };
+  if(editingId){const i=states.findIndex(s=>s.id===editingId);if(i>-1)states[i]={...states[i],...data};}
+  else{data.id=mkId();data.tags=[];states.push(data);}
+  save(); renderStats(); render(); closeModal();
+}
+function deleteState(id) {
+  if(!confirm('Remove this state?')) return;
+  states=states.filter(s=>s.id!==id);
+  if(activeId===id){activeId=null;closeDetail();}
+  save(); renderStats(); render();
+}
+
+/* ── AI IMPORT ── */
+function openImportModal() {
+  document.getElementById('importModal').classList.add('open');
+  document.getElementById('importResults').innerHTML='';
+  document.getElementById('importActions').style.display='none';
+  document.getElementById('aiStatus').className='ai-status';
+  importedResults=[];
+}
+function closeImportModal() { document.getElementById('importModal').classList.remove('open'); }
+
+async function runImport() {
+  const apiKey = document.getElementById('apiKeyInput').value.trim();
+  const text   = document.getElementById('importText').value.trim();
+  if (!apiKey) { showAiError('Please enter your Anthropic API key above.'); return; }
+  if (!text)   { showAiError('Please paste some scouting text first.'); return; }
+
+  const status = document.getElementById('aiStatus');
+  status.className='ai-status thinking';
+  document.getElementById('aiStatusText').textContent='Analysing text...';
+  document.getElementById('importResults').innerHTML='';
+  document.getElementById('importActions').style.display='none';
+  document.getElementById('btnRunImport').disabled=true;
+
+  const systemPrompt = `You are a data extraction assistant for the mobile game Puzzles & Survival. Extract information about game states (servers) from the text provided. Return ONLY valid JSON — no markdown, no explanation, no code fences.
+
+Return a JSON array of objects. Each object represents one state and must use these exact keys (use null for unknown values):
+{
+  "number": <integer state number, required>,
+  "name": <string nickname or null>,
+  "viability": <"viable"|"monitor"|"avoid"|"unknown">,
+  "phase": <"early"|"mid"|"late"|null>,
+  "age": <integer days old or null>,
+  "topAlliance": <string or null>,
+  "topPower": <string power value like "850M" or null>,
+  "nap": <string describing NAP/war status or null>,
+  "migCost": <integer gem cost or null>,
+  "migReq": <string requirements or null>,
+  "notes": <string any other relevant notes or null>
+}
+
+Viability inference rules:
+- "viable": explicitly positive, good candidate, recommended
+- "monitor": mixed signals, needs more info, borderline
+- "avoid": explicitly negative, dangerous, not recommended, heavy war zone
+- "unknown": no viability signal found
+
+If no states are found, return an empty array [].`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: text }]
+      })
+    });
+
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error?.message || 'API error '+resp.status);
+
+    const raw = data.content.map(c=>c.text||'').join('').trim();
+    let extracted;
+    try { extracted = JSON.parse(raw); }
+    catch(e) {
+      const match = raw.match(/\[[\s\S]*\]/);
+      if (match) extracted = JSON.parse(match[0]);
+      else throw new Error('Could not parse AI response as JSON.');
+    }
+
+    status.className='ai-status';
+    document.getElementById('btnRunImport').disabled=false;
+
+    if (!extracted.length) {
+      showAiError('No state data found in that text. Try pasting more detailed scouting info.');
+      return;
+    }
+
+    importedResults = extracted;
+    renderImportResults(extracted);
+
+  } catch(e) {
+    showAiError('Error: '+e.message);
+    document.getElementById('btnRunImport').disabled=false;
+  }
+}
+
+function showAiError(msg) {
+  const status = document.getElementById('aiStatus');
+  status.className='ai-status error';
+  status.textContent=msg;
+  document.getElementById('btnRunImport').disabled=false;
+}
+
+function renderImportResults(results) {
+  const cont = document.getElementById('importResults');
+  const vLbl = {viable:'Viable',monitor:'Monitor',avoid:'Avoid',unknown:'Unknown'};
+  const vMap  = {viable:'bv',monitor:'bm',avoid:'ba',unknown:'bu'};
+
+  cont.innerHTML = `<div style="font-family:var(--ff-l);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin-bottom:10px">${results.length} state${results.length!==1?'s':''} found — select to import</div>` +
+    results.map((r,i) => {
+      const existing = states.find(s=>s.number===r.number);
+      const ageEst = calcAge(r.number);
+      const ageDisplay = r.age ? r.age+'d (from text)' : (ageEst ? ageEst+'d (est.)' : '—');
+      return `<div class="ai-result-card">
+        <input type="checkbox" class="arc-check" id="chk${i}" checked ${existing?'title="State already exists — will update"':''} />
+        <div class="arc-num">${pad(r.number)}${existing?' <span style="font-size:11px;color:var(--amber)">(exists — will update)</span>':''}</div>
+        <div class="ai-result-grid">
+          ${r.name?`<div class="arc-field"><span>Name</span>${esc(r.name)}</div>`:''}
+          <div class="arc-field"><span>Viability</span><span class="badge ${vMap[r.viability||'unknown']}" style="font-size:10px;padding:2px 7px">${vLbl[r.viability||'unknown']}</span></div>
+          ${r.phase?`<div class="arc-field"><span>Phase</span>${r.phase}</div>`:''}
+          <div class="arc-field"><span>Age</span>${ageDisplay}</div>
+          ${r.topAlliance?`<div class="arc-field"><span>Top alliance</span>${esc(r.topAlliance)}</div>`:''}
+          ${r.topPower?`<div class="arc-field"><span>Top power</span>${esc(r.topPower)}</div>`:''}
+          ${r.nap?`<div class="arc-field" style="grid-column:1/-1"><span>NAP / War</span>${esc(r.nap)}</div>`:''}
+          ${r.migCost?`<div class="arc-field"><span>Mig. cost</span>${Number(r.migCost).toLocaleString()} gems</div>`:''}
+          ${r.migReq?`<div class="arc-field"><span>Requirements</span>${esc(r.migReq)}</div>`:''}
+          ${r.notes?`<div class="arc-field" style="grid-column:1/-1"><span>Notes</span>${esc(r.notes)}</div>`:''}
+        </div>
+      </div>`;
+    }).join('');
+
+  document.getElementById('importActions').style.display='flex';
+}
+
+function confirmImport() {
+  let count = 0;
+  importedResults.forEach((r, i) => {
+    const chk = document.getElementById('chk'+i);
+    if (!chk || !chk.checked) return;
+    const ageEst = calcAge(r.number);
+    const ageVal = r.age ? String(r.age) : (ageEst ? String(ageEst) : '');
+    const ageIsAuto = !r.age;
+    const existing = states.find(s=>s.number===r.number);
+    const data = {
+      number: r.number,
+      name: r.name||'',
+      viability: r.viability||'unknown',
+      phase: r.phase||'',
+      age: ageVal, ageAuto: ageIsAuto,
+      topAlliance: r.topAlliance||'',
+      topPower: r.topPower||'',
+      nap: r.nap||'',
+      migCost: r.migCost?String(r.migCost):'',
+      migReq: r.migReq||'',
+      notes: r.notes||'',
+    };
+    if (existing) { Object.assign(existing, data); }
+    else { data.id=mkId(); data.tags=[]; states.push(data); }
+    count++;
+  });
+  save(); renderStats(); render(); closeImportModal();
+  if (count) { document.getElementById('importText').value=''; }
+}
+
+/* keyboard */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    closeModal(); closeRangeModal(); closeImportModal();
+    if(document.getElementById('dOverlay').classList.contains('open')) closeDetail();
+  }
+});
+document.getElementById('svrModal').addEventListener('click',e=>{if(e.target===document.getElementById('svrModal'))closeModal();});
+document.getElementById('rangeModal').addEventListener('click',e=>{if(e.target===document.getElementById('rangeModal'))closeRangeModal();});
+document.getElementById('importModal').addEventListener('click',e=>{if(e.target===document.getElementById('importModal'))closeImportModal();});
+
+load();
+</script>
+</body>
+</html>
