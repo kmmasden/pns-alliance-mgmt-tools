@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>P&S State Scout</title>
+<title>PNS State Scout</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Barlow:wght@300;400;500&family=Barlow+Condensed:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -220,7 +220,23 @@ select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t
 .bp { background:var(--blue-dim); border-color:rgba(74,158,255,.22); color:var(--blue); }
 
 /* empty */
-.empty-state { text-align:center; padding:60px 20px; color:var(--t3); }
+.group-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 18px; background:var(--bg3);
+  border-bottom:1px solid var(--border); cursor:pointer;
+  user-select:none; transition:background .15s;
+}
+.group-header:hover { background:var(--bg4); }
+.group-header-left { display:flex; align-items:center; gap:10px; }
+.group-label { font-family:var(--ff-l); font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--t2); }
+.group-range { font-family:var(--ff-d); font-size:15px; font-weight:600; color:var(--t1); }
+.group-count { font-family:var(--ff-l); font-size:11px; color:var(--t3); }
+.group-chevron { color:var(--t3); transition:transform .2s; }
+.group-chevron svg { width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2.5; display:block; }
+.group-chevron.open { transform:rotate(90deg); }
+.group-body { display:none; }
+.group-body.open { display:block; }
+ padding:60px 20px; color:var(--t3); }
 .empty-state svg { width:40px; height:40px; opacity:.3; margin-bottom:12px; stroke:currentColor; fill:none; stroke-width:1.5; display:block; margin-left:auto; margin-right:auto; }
 .empty-state p { font-size:13px; margin-bottom:16px; }
 
@@ -394,7 +410,7 @@ select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t
         <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
       </div>
       <div>
-        <div class="init-wordmark">P<span>&amp;</span>S STATE SCOUT</div>
+        <div class="init-wordmark">PNS STATE SCOUT</div>
         <div class="init-tagline">Alliance Migration Research</div>
       </div>
     </div>
@@ -427,7 +443,7 @@ select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t
         <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
       </div>
       <div>
-        <div class="brand-name">P<span>&amp;</span>S STATE SCOUT</div>
+        <div class="brand-name">PNS STATE SCOUT</div>
         <div class="brand-sub">Alliance Migration Research</div>
       </div>
     </div>
@@ -473,6 +489,18 @@ select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t
 
   <div class="controls">
     <span style="font-family:var(--ff-l);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3)" id="listLbl">0 states</span>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-family:var(--ff-l);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--t3)">Group by</span>
+      <select id="groupSizeSelect" class="fsel" style="padding:6px 28px 6px 10px;font-size:12px" onchange="onGroupSizeChange()">
+        <option value="10">10</option>
+        <option value="20" selected>20</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="0">No grouping</option>
+      </select>
+    </div>
   </div>
 
   <div class="table-wrap">
@@ -692,6 +720,15 @@ function load() {
     document.getElementById('initScreen').style.display = 'flex';
     document.getElementById('appScreen').style.display = 'none';
   } else {
+    // Back-fill ages for states that were saved before auto-age was implemented
+    let migrated = false;
+    states.forEach(s => {
+      if (!s.age || s.age === '') {
+        const est = calcAge(s.number);
+        if (est !== null) { s.age = String(est); s.ageAuto = true; migrated = true; }
+      }
+    });
+    if (migrated) save();
     showApp();
   }
   // restore api key — not needed in server version
@@ -800,6 +837,32 @@ function renderStats() {
   document.getElementById('stAvoid').textContent   = states.filter(s=>s.viability==='avoid').length;
 }
 
+// A state is considered scouted if any intel field beyond auto-defaults has been filled in
+function isScounted(s) {
+  return !!(
+    s.name ||
+    s.viability !== 'unknown' ||
+    s.phase ||
+    (s.age && !s.ageAuto) ||
+    s.topAlliance ||
+    s.topPower ||
+    s.nap ||
+    s.migCost ||
+    s.migReq ||
+    s.notes ||
+    (s.tags && s.tags.length > 0)
+  );
+}
+
+let GROUP_SIZE = 20;
+let collapsedGroups = new Set();
+
+function onGroupSizeChange() {
+  GROUP_SIZE = parseInt(document.getElementById('groupSizeSelect').value);
+  collapsedGroups = new Set(); // reset collapse state when grouping changes
+  render();
+}
+
 function render() {
   const q  = (document.getElementById('searchInput')?.value||'').trim().toLowerCase();
   const vf = document.getElementById('viaFilter')?.value||'';
@@ -817,7 +880,63 @@ function render() {
   const vMap={viable:'bv',monitor:'bm',avoid:'ba',unknown:'bu'};
   const vLbl={viable:'Viable',monitor:'Monitor',avoid:'Avoid',unknown:'Unknown'};
   const pLbl={early:'Early',mid:'Mid',late:'Late'};
-  cont.innerHTML=list.map((s,i)=>`
+
+  // Skip grouping when filters/search are active, list is small, or grouping disabled
+  const useGroups = !q && !vf && !pf && GROUP_SIZE > 0 && list.length > GROUP_SIZE;
+
+  if (!useGroups) {
+    cont.innerHTML = list.map((s,i) => rowHtml(s, i, vMap, vLbl, pLbl)).join('');
+    return;
+  }
+
+  let html = '';
+  for (let i = 0; i < list.length; i += GROUP_SIZE) {
+    const chunk = list.slice(i, i + GROUP_SIZE);
+    const first = chunk[0].number;
+    const last  = chunk[chunk.length-1].number;
+    const gid   = 'g_'+first+'_'+last;
+    const isOpen = collapsedGroups.has(gid + '_open');
+    const vc = {};
+    chunk.forEach(s => { const v=s.viability||'unknown'; vc[v]=(vc[v]||0)+1; });
+    const pills = ['viable','monitor','avoid','unknown']
+      .filter(v=>vc[v])
+      .map(v=>`<span class="badge ${vMap[v]}" style="font-size:10px;padding:2px 7px">${vc[v]}</span>`)
+      .join('');
+    const scoutedCount = chunk.filter(s => isScounted(s)).length;
+    const scoutedPill = scoutedCount > 0
+      ? `<span style="font-family:var(--ff-l);font-size:11px;color:var(--accent);background:var(--accent-dim);border:1px solid rgba(0,217,163,.25);border-radius:4px;padding:2px 8px;letter-spacing:.3px">${scoutedCount}/${chunk.length} scouted</span>`
+      : `<span style="font-family:var(--ff-l);font-size:11px;color:var(--t3)">0/${chunk.length} scouted</span>`;
+    html += `
+      <div class="group-header" onclick="toggleGroup('${gid}')">
+        <div class="group-header-left">
+          <div class="group-range">${pad(first)} — ${pad(last)}</div>
+          <div class="group-count">${chunk.length} states</div>
+          ${scoutedPill}
+          <div style="display:flex;gap:4px;align-items:center">${pills}</div>
+        </div>
+        <div class="group-chevron${isOpen?' open':''}" id="chev_${gid}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+      <div class="group-body${isOpen?' open':''}" id="${gid}">
+        ${chunk.map((s,j) => rowHtml(s, i+j, vMap, vLbl, pLbl)).join('')}
+      </div>`;
+  }
+  cont.innerHTML = html;
+}
+
+function toggleGroup(gid) {
+  const body = document.getElementById(gid);
+  const chev = document.getElementById('chev_'+gid);
+  if (!body) return;
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  chev.classList.toggle('open', !isOpen);
+  if (isOpen) collapsedGroups.delete(gid+'_open'); else collapsedGroups.add(gid+'_open');
+}
+
+function rowHtml(s, i, vMap, vLbl, pLbl) {
+  return `
     <div class="state-row${s.id===activeId?' selected':''}" onclick="openDetail('${s.id}')" style="animation-delay:${Math.min(i*.015,.3)}s">
       <div class="srv-num">${pad(s.number)}</div>
       <div class="srv-name">${s.name?esc(s.name):'<span style="color:var(--t3);font-style:italic">—</span>'}${s.topAlliance?`<span class="srv-sub">${esc(s.topAlliance)}</span>`:''}</div>
@@ -834,8 +953,9 @@ function render() {
           <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
         </button>
       </div>
-    </div>`).join('');
+    </div>`;
 }
+
 
 /* detail panel */
 function openDetail(id) {
