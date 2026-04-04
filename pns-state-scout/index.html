@@ -461,6 +461,7 @@ select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t
         <div class="brand-name">PNS STATE SCOUT</div>
         <div class="brand-sub">Alliance Migration Research</div>
       </div>
+      <div style="font-family:var(--ff-l);font-size:11px;letter-spacing:.5px;transition:color .3s" id="syncStatus"></div>
     </div>
     <div class="header-right">
       <div class="search-wrap" style="min-width:200px">
@@ -475,6 +476,10 @@ select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t
         <option value="unknown">Unknown</option>
       </select>
 
+      <button class="btn btn-ghost btn-sm" onclick="refreshData()" title="Pull latest data from shared store">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Refresh
+      </button>
       <button class="btn btn-ghost btn-sm" onclick="openRangeModal()">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add range
@@ -719,7 +724,22 @@ select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t
           style="width:100%;min-height:160px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--t1);font-family:var(--ff-b);font-size:13px;line-height:1.6;resize:vertical;outline:none;box-sizing:border-box;display:block"
           placeholder="Paste scouting info — Discord messages, Reddit posts, notes...&#10;&#10;e.g. 'State 1107 — top alliance [WAR] sitting at 920M power, opened ~3 weeks ago, heavy war zone north, migration 45k gems, requires day 30+...'"
           onfocus="this.style.borderColor='rgba(0,217,163,.4)'"
-          onblur="this.style.borderColor='var(--border)'"></textarea>
+          onblur="this.style.borderColor='var(--border)'"
+          oninput="autoDetectPasteInfo(this.value)"></textarea>
+        <div style="display:grid;grid-template-columns:1fr 160px;gap:8px;margin-top:8px">
+          <div>
+            <div style="font-family:var(--ff-l);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--t3);margin-bottom:4px">Source <span style="font-weight:400;letter-spacing:0;text-transform:none">(optional)</span></div>
+            <input type="text" id="importSource" placeholder="e.g. Reddit r/PuzzlesandSurvival, Discord #scouting"
+              style="width:100%;padding:7px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--t1);font-family:var(--ff-b);font-size:12px;outline:none"
+              onfocus="this.style.borderColor='rgba(0,217,163,.4)'" onblur="this.style.borderColor='var(--border)'" />
+          </div>
+          <div>
+            <div style="font-family:var(--ff-l);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--t3);margin-bottom:4px">Post date <span style="font-weight:400;letter-spacing:0;text-transform:none">(auto-detected)</span></div>
+            <input type="date" id="importDate"
+              style="width:100%;padding:7px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--t1);font-family:var(--ff-b);font-size:12px;outline:none;color-scheme:dark"
+              onfocus="this.style.borderColor='rgba(0,217,163,.4)'" onblur="this.style.borderColor='var(--border)'" />
+          </div>
+        </div>
       </div><button class="btn btn-primary" style="width:100%;justify-content:center;margin:14px 0" onclick="runImport()" id="btnRunImport">
         <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="m9 12 2 2 4-4"/></svg>
         Extract with AI
@@ -749,28 +769,109 @@ let editingId = null;
 let importedResults = [];
 
 /* storage */
-function load() {
-  try { const r = localStorage.getItem(SK); states = r ? JSON.parse(r) : null; }
-  catch(e) { states = null; }
-  if (states === null) {
-    states = [];
-    document.getElementById('initScreen').style.display = 'flex';
-    document.getElementById('appScreen').style.display = 'none';
-  } else {
-    // Back-fill ages for states that were saved before auto-age was implemented
-    let migrated = false;
-    states.forEach(s => {
-      if (!s.age || s.age === '') {
-        const est = calcAge(s.number);
-        if (est !== null) { s.age = String(est); s.ageAuto = true; migrated = true; }
-      }
-    });
-    if (migrated) save();
+let saveTimer = null;
+
+async function load() {
+  // Show loading state
+  document.getElementById('initScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'block';
+  showSyncStatus('loading');
+
+  try {
+    const resp = await fetch('/api/data');
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    states = Array.isArray(data.states) ? data.states : [];
+
+    // First run — no states in KV yet
+    if (states.length === 0 && !localStorage.getItem(SK + '_seeded')) {
+      document.getElementById('appScreen').style.display = 'none';
+      document.getElementById('initScreen').style.display = 'flex';
+      showSyncStatus('');
+      return;
+    }
+
+    backfillAges();
     showApp();
+    showSyncStatus('synced');
+  } catch(e) {
+    // KV unavailable — fall back to localStorage
+    console.warn('KV load failed, using localStorage:', e.message);
+    try { const r = localStorage.getItem(SK); states = r ? JSON.parse(r) : []; } catch(_) { states = []; }
+    if (states.length === 0) {
+      document.getElementById('appScreen').style.display = 'none';
+      document.getElementById('initScreen').style.display = 'flex';
+    } else {
+      backfillAges();
+      showApp();
+    }
+    showSyncStatus('offline');
   }
-  // restore api key — not needed in server version
 }
-function save() { try { localStorage.setItem(SK, JSON.stringify(states)); } catch(e) {} }
+
+async function refreshData() {
+  showSyncStatus('loading');
+  try {
+    const resp = await fetch('/api/data');
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    states = Array.isArray(data.states) ? data.states : [];
+    backfillAges();
+    renderStats(); render();
+    showSyncStatus('synced');
+  } catch(e) {
+    showSyncStatus('offline');
+  }
+}
+
+function backfillAges() {
+  let migrated = false;
+  states.forEach(s => {
+    if (!s.age || s.age === '') {
+      const est = calcAge(s.number);
+      if (est !== null) { s.age = String(est); s.ageAuto = true; migrated = true; }
+    }
+  });
+  if (migrated) save();
+}
+
+function save() {
+  // Write to localStorage immediately as a local cache
+  try { localStorage.setItem(SK, JSON.stringify(states)); localStorage.setItem(SK + '_seeded', '1'); } catch(e) {}
+  // Debounce KV writes — batch rapid changes into one request
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    showSyncStatus('saving');
+    try {
+      const resp = await fetch('/api/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ states })
+      });
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      showSyncStatus('synced');
+    } catch(e) {
+      console.warn('KV save failed:', e.message);
+      showSyncStatus('offline');
+    }
+  }, 800);
+}
+
+function showSyncStatus(status) {
+  const el = document.getElementById('syncStatus');
+  if (!el) return;
+  const map = {
+    loading: { text: 'Loading...', color: 'var(--t3)' },
+    saving:  { text: 'Saving...', color: 'var(--amber)' },
+    synced:  { text: '● Synced', color: 'var(--accent)' },
+    offline: { text: '● Offline', color: 'var(--red)' },
+    '':      { text: '', color: '' }
+  };
+  const s = map[status] || map[''];
+  el.textContent = s.text;
+  el.style.color = s.color;
+}
+
 function mkId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
 /* ── AGE ESTIMATION ──
@@ -936,11 +1037,15 @@ function render() {
       .join('');
     const scoutedCount = chunk.filter(s => isScounted(s)).length;
     const scoutedPill = scoutedCount > 0
-      ? `<span style="font-family:var(--ff-l);font-size:11px;color:var(--accent);background:var(--accent-dim);border:1px solid rgba(0,217,163,.25);border-radius:4px;padding:2px 8px;letter-spacing:.3px">${scoutedCount}/${chunk.length} scouted</span>`
+      ? `<span style="font-family:var(--ff-l);font-size:11px;color:var(--t2);background:rgba(255,255,255,0.06);border:1px solid var(--border2);border-radius:4px;padding:2px 8px;letter-spacing:.3px">${scoutedCount}/${chunk.length} scouted</span>`
       : `<span style="font-family:var(--ff-l);font-size:11px;color:var(--t3)">0/${chunk.length} scouted</span>`;
     const farmCount = chunk.filter(s => s.farm && s.farm.trim()).length;
     const farmPill = farmCount > 0
       ? `<span style="font-family:var(--ff-l);font-size:11px;color:#a78bfa;background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.35);border-radius:4px;padding:2px 8px;letter-spacing:.3px">${farmCount} farm${farmCount>1?'s':''}</span>`
+      : '';
+    const notesCount = chunk.filter(s => s.notes && s.notes.trim()).length;
+    const notesPill = notesCount > 0
+      ? `<span style="font-family:var(--ff-l);font-size:11px;color:var(--t2);white-space:nowrap">${notesCount} note${notesCount>1?'s':''}</span>`
       : '';
     html += `
       <div style="display:grid;grid-template-columns:90px 1fr 110px 80px 120px 130px 80px 90px;width:100%;border-bottom:1px solid var(--border);background:var(--bg3);cursor:pointer;transition:background .15s;padding:10px 18px;box-sizing:border-box;gap:12px;align-items:center" onclick="toggleGroup('${gid}')" onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">
@@ -948,6 +1053,7 @@ function render() {
         <span style="grid-column:3;display:flex;gap:4px;align-items:center">${pills}</span>
         <span style="grid-column:4/6">${scoutedPill}</span>
         <span style="grid-column:6">${farmPill}</span>
+        <span style="grid-column:7">${notesPill}</span>
         <div style="grid-column:8;display:flex;align-items:center;justify-content:flex-end;gap:6px">
           <div class="group-chevron${isOpen?' open':''}" id="chev_${gid}" style="flex-shrink:0">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;display:block"><polyline points="9 18 15 12 9 6"/></svg>
@@ -1162,11 +1268,46 @@ function openImportModal() {
   document.getElementById('aiStatus').className='ai-status';
   document.getElementById('imgPreviews').innerHTML='';
   document.getElementById('importText').value='';
+  document.getElementById('importSource').value='';
+  document.getElementById('importDate').value='';
   importedResults=[];
   uploadedImages=[];
   switchTab('img');
 }
 function closeImportModal() { document.getElementById('importModal').classList.remove('open'); }
+
+function autoDetectPasteInfo(text) {
+  if (!text) return;
+
+  // Detect Reddit-style relative time: "14d ago", "2y ago", "6h ago", "3mo ago", "1yr ago"
+  const timeMatch = text.match(/\b(\d+)\s*(h|hr|hrs|hour|hours|d|day|days|w|wk|wks|week|weeks|mo|month|months|y|yr|yrs|year|years)\s+ago\b/i);
+  if (timeMatch) {
+    const num = parseInt(timeMatch[1]);
+    const unit = timeMatch[2].toLowerCase();
+    const now = new Date();
+    let ms = 0;
+    if      (unit.startsWith('h'))  ms = num * 3600000;
+    else if (unit.startsWith('d'))  ms = num * 86400000;
+    else if (unit.startsWith('w'))  ms = num * 7 * 86400000;
+    else if (unit.startsWith('mo')) ms = num * 30 * 86400000;
+    else if (unit.startsWith('y') || unit.startsWith('yr')) ms = num * 365 * 86400000;
+    if (ms > 0) {
+      const date = new Date(now.getTime() - ms);
+      document.getElementById('importDate').value = date.toISOString().slice(0, 10);
+    }
+  }
+
+  // Auto-detect Reddit source
+  const srcField = document.getElementById('importSource');
+  if (!srcField.value) {
+    if (/r\/puzzlesandsurvival/i.test(text)) {
+      srcField.value = 'Reddit r/PuzzlesandSurvival';
+    } else if (/r\/[a-zA-Z0-9_]+/.test(text)) {
+      const sub = text.match(/r\/([a-zA-Z0-9_]+)/)?.[1];
+      if (sub) srcField.value = `Reddit r/${sub}`;
+    }
+  }
+}
 
 function switchTab(tab) {
   document.getElementById('tabImg').classList.toggle('active', tab==='img');
@@ -1332,6 +1473,13 @@ function renderImportResults(results) {
   function napVal(v) { if(!v) return ''; return napMap[v] || v; }
 function confirmImport() {
   let count = 0;
+  const source = document.getElementById('importSource')?.value.trim() || '';
+  const date   = document.getElementById('importDate')?.value || '';
+  const sourceTag = [
+    source ? `Source: ${source}` : '',
+    date   ? `Post date: ${new Date(date+'T00:00:00').toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})}` : ''
+  ].filter(Boolean).join(' · ');
+
   importedResults.forEach((r, i) => {
     const chk = document.getElementById('chk'+i);
     if (!chk || !chk.checked) return;
@@ -1339,6 +1487,8 @@ function confirmImport() {
     const ageVal = r.age ? String(r.age) : (ageEst ? String(ageEst) : '');
     const ageIsAuto = !r.age;
     const existing = states.find(s=>s.number===r.number);
+    const baseNotes = r.notes||'';
+    const notes = sourceTag ? (baseNotes ? `${baseNotes}\n\n${sourceTag}` : sourceTag) : baseNotes;
     const data = {
       number: r.number,
       name: r.name||'',
@@ -1348,7 +1498,7 @@ function confirmImport() {
       topPower: r.topPower||'',
       nap: napVal(r.nap||''),
       migReq: r.migReq||'',
-      notes: r.notes||'',
+      notes: notes,
     };
     if (existing) { Object.assign(existing, data); }
     else { data.id=mkId(); data.tags=[]; states.push(data); }
