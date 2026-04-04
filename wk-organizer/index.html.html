@@ -1,0 +1,1752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wasteland King — Schedule Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --bg:#09090d; --surf:#0f1117; --surf2:#161b24; --surf3:#1c2330;
+  --bdr:#242d3d; --bdr2:#38485e;
+  --acc:#e8a020; --acc2:#f0c060; --acc-d:rgba(232,160,32,.13); --acc-d2:rgba(232,160,32,.06);
+  --red:#e84050; --red-d:rgba(232,64,80,.13);
+  --grn:#38c870; --grn-d:rgba(56,200,112,.13);
+  --pur:#a060e8;
+  --txt:#c8d4e8; --txt-d:#5a6880; --txt-m:#7a8fa8;
+  --rdr:#e8a020; --rdr-d:rgba(232,160,32,.1);
+  --fgt:#e84060; --fgt-d:rgba(232,64,96,.1);
+  --sht:#38a8e8; --sht-d:rgba(56,168,232,.1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'Exo 2',sans-serif;font-size:13px;min-height:100vh;
+  background-image:radial-gradient(ellipse at 15% 0%,rgba(232,160,32,.03) 0%,transparent 55%),
+  radial-gradient(ellipse at 85% 100%,rgba(64,144,232,.03) 0%,transparent 55%)}
+
+/* ── HEADER ── */
+header{height:54px;background:rgba(15,17,23,.96);border-bottom:1px solid var(--bdr);padding:0 20px;
+  display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.logo{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--acc);display:flex;align-items:center;gap:10px}
+.logo-sub{color:var(--txt-d);font-size:11px;font-weight:400;letter-spacing:1px}
+.hbtns{display:flex;gap:7px}
+
+/* ── BUTTONS ── */
+.btn{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;
+  padding:6px 13px;border-radius:4px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .13s;white-space:nowrap}
+.btn-ghost{background:transparent;color:var(--txt-m);border:1px solid var(--bdr)}
+.btn-ghost:hover{border-color:var(--bdr2);color:var(--txt);background:var(--surf2)}
+.btn-primary{background:var(--acc);color:#08090d}
+.btn-primary:hover{background:var(--acc2)}
+.btn-danger{background:transparent;color:var(--red);border:1px solid rgba(232,64,80,.25)}
+.btn-danger:hover{background:var(--red-d)}
+.btn-ok{background:transparent;color:var(--grn);border:1px solid rgba(56,200,112,.3)}
+.btn-ok:hover{background:var(--grn-d)}
+.btn-sm{padding:4px 10px;font-size:11px}
+.btn-xs{padding:2px 7px;font-size:10px;letter-spacing:.5px}
+
+/* ── LAYOUT ── */
+.app{display:grid;grid-template-columns:310px 1fr;height:calc(100vh - 54px)}
+
+/* ── LEFT PANEL ── */
+.left{border-right:1px solid var(--bdr);display:flex;flex-direction:column;overflow:hidden;background:var(--surf)}
+.phd{padding:12px 14px 10px;border-bottom:1px solid var(--bdr);display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+.ptitle{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--acc)}
+.swrap{position:relative}
+.swrap input{width:100%;background:var(--surf2);border:1px solid var(--bdr);border-radius:4px;
+  padding:6px 8px 6px 28px;color:var(--txt);font-family:'Exo 2',sans-serif;font-size:12px;outline:none}
+.swrap input:focus{border-color:var(--acc)}
+.swrap::before{content:'⌕';position:absolute;left:8px;top:50%;transform:translateY(-50%);color:var(--txt-d);font-size:14px;pointer-events:none}
+.filters{display:flex;gap:5px;flex-wrap:wrap}
+.fc{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  padding:2px 8px;border-radius:3px;border:1px solid var(--bdr);background:transparent;color:var(--txt-d);cursor:pointer;transition:all .1s}
+.fc:hover{border-color:var(--bdr2);color:var(--txt)}
+.fc.fa{border-color:var(--acc);background:var(--acc-d);color:var(--acc)}
+.fc.fr{border-color:var(--rdr);background:var(--rdr-d);color:var(--rdr)}
+.fc.ff{border-color:var(--fgt);background:var(--fgt-d);color:var(--fgt)}
+.fc.fs{border-color:var(--sht);background:var(--sht-d);color:var(--sht)}
+.fc.fu{border-color:var(--grn);background:var(--grn-d);color:var(--grn)}
+.fc.fcp{border-color:var(--pur);background:rgba(160,96,232,.1);color:var(--pur)}
+.fc.fsh{border-color:var(--blue);background:rgba(64,144,232,.1);color:var(--blue)}
+.rstats{padding:6px 14px;border-bottom:1px solid var(--bdr);background:var(--surf2);display:flex;gap:10px;flex-wrap:wrap;flex-shrink:0}
+.st{font-size:10px;color:var(--txt-d);display:flex;gap:3px;align-items:center}
+.st strong{color:var(--txt);font-size:11px}
+.rscroll{overflow-y:auto;flex:1}
+.rscroll::-webkit-scrollbar{width:3px}
+.rscroll::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
+.ri{padding:7px 12px;border-bottom:1px solid var(--bdr);cursor:grab;transition:background .1s;position:relative;user-select:none}
+.ri:hover{background:var(--surf2)}
+.ri.asgd{opacity:.38}
+.ri.asgd::after{content:'✓';position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--grn);font-size:11px}
+.ri:active{cursor:grabbing}
+.rn{font-size:13px;font-weight:600;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px}
+.rm{display:flex;gap:5px;align-items:center;margin-top:2px;flex-wrap:wrap}
+.tag{font-family:'Share Tech Mono',monospace;font-size:10px;padding:0 4px;border-radius:2px;border:1px solid}
+.tgal{border-color:var(--bdr);background:var(--surf3);color:var(--txt-m)}
+.tgti{border-color:var(--bdr);background:var(--surf3);color:var(--acc)}
+.tgR{border-color:rgba(232,160,32,.3);background:var(--rdr-d);color:var(--rdr)}
+.tgF{border-color:rgba(232,64,96,.3);background:var(--fgt-d);color:var(--fgt)}
+.tgS{border-color:rgba(56,168,232,.3);background:var(--sht-d);color:var(--sht)}
+.tgcp{border-color:rgba(160,96,232,.4);background:rgba(160,96,232,.1);color:var(--pur);font-size:9px}
+.rt{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--txt-m)}
+.rav{font-size:10px;color:var(--txt-d)}
+.rnote{font-size:10px;color:var(--txt-d);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:265px;font-style:italic}
+
+/* ── RIGHT PANEL ── */
+.right{display:flex;flex-direction:column;overflow:hidden}
+.shd{padding:10px 18px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px;background:var(--surf);flex-shrink:0}
+.einp{background:transparent;border:none;border-bottom:1px solid var(--bdr);color:var(--txt);
+  font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;letter-spacing:1px;outline:none;padding:2px 4px;width:250px}
+.einp:focus{border-bottom-color:var(--acc)}
+.sa{overflow-y:auto;flex:1;padding:14px;display:flex;flex-direction:column;gap:14px}
+.sa::-webkit-scrollbar{width:3px}
+.sa::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
+
+/* ── POSITION CARDS ── */
+.pc{background:var(--surf);border:1px solid var(--bdr);border-radius:6px;overflow:hidden}
+.pch{padding:9px 13px;background:var(--surf2);border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pn{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;flex:1;min-width:60px}
+.pn.R{color:var(--rdr)} .pn.F{color:var(--fgt)} .pn.S{color:var(--sht)} .pn.M{color:var(--txt)}
+.psum{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--txt-d)}
+
+/* ── SHIFTS ── */
+.shifts{display:grid;grid-template-columns:1fr 1fr 1fr}
+.shift{border-right:1px solid var(--bdr);padding:9px 11px;min-height:110px;display:flex;flex-direction:column}
+.shift:last-child{border-right:none}
+.shd2{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:4px}
+.slbl{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--txt-d)}
+.scnt{font-family:'Share Tech Mono',monospace;font-size:10px}
+.cok{color:var(--grn)} .cover{color:var(--acc)} .cund{color:var(--red)}
+.caps{margin-bottom:5px}
+.capr{padding:4px 7px;background:var(--acc-d2);border:1px solid rgba(232,160,32,.18);border-radius:3px;display:flex;align-items:center;gap:5px;margin-bottom:3px}
+.capl{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;color:var(--acc)}
+.capi{background:transparent;border:none;border-bottom:1px dashed rgba(232,160,32,.3);color:var(--acc2);
+  font-family:'Share Tech Mono',monospace;font-size:11px;outline:none;flex:1;min-width:0}
+.capi:focus{border-bottom-color:var(--acc)}
+.rally-inp{background:var(--surf3);border:1px solid var(--bdr);border-radius:3px;color:var(--txt-m);
+  font-family:'Share Tech Mono',monospace;font-size:10px;padding:2px 5px;outline:none;width:100%;margin-bottom:4px}
+.rally-inp:focus{border-color:var(--acc)}
+.dz{flex:1;min-height:48px;max-height:200px;overflow-y:auto;border:1px dashed var(--bdr);border-radius:3px;padding:4px;display:flex;flex-direction:column;gap:2px;transition:border-color .12s,background .12s}
+.dz::-webkit-scrollbar{width:3px}
+.dz::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px}
+.dz.over{border-color:var(--acc);background:var(--acc-d2)}
+.dze{color:var(--txt-d);font-size:10px;text-align:center;padding:10px 0;pointer-events:none}
+.rb{margin-top:5px;height:2px;background:var(--surf3);border-radius:2px;overflow:hidden}
+.rbf{height:100%;border-radius:2px;transition:width .3s}
+.rbok{background:var(--grn)} .rbov{background:var(--acc)} .rbun{background:var(--red)}
+
+/* ── ASSIGNED PLAYER ROW ── */
+.ap{display:flex;align-items:center;gap:4px;padding:3px 5px;background:var(--surf2);border:1px solid var(--bdr);border-radius:3px;animation:sli .12s ease}
+@keyframes sli{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+.apal{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txt-d);min-width:26px}
+.apn{flex:1;font-size:11px;font-weight:600;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.apti{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--acc);min-width:20px}
+.apt{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txt-m);border-bottom:1px dashed var(--bdr2);cursor:text;min-width:52px;text-align:right;outline:none}
+.apt:focus{border-bottom-color:var(--acc);color:var(--txt)}
+.aprm{background:none;border:none;color:var(--txt-d);cursor:pointer;font-size:12px;padding:0 1px;line-height:1;transition:color .1s;flex-shrink:0}
+.aprm:hover{color:var(--red)}
+
+/* ── MODALS ── */
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(5px);animation:fi .14s ease}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+.modal{background:var(--surf);border:1px solid var(--bdr2);border-radius:8px;padding:22px;width:560px;max-width:96vw;max-height:90vh;overflow-y:auto;box-shadow:0 28px 80px rgba(0,0,0,.65)}
+.modal::-webkit-scrollbar{width:3px}
+.modal::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
+.mtitle{font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--acc);margin-bottom:14px}
+.mclose{float:right;background:none;border:none;color:var(--txt-d);font-size:20px;cursor:pointer;margin-top:-4px}
+.mclose:hover{color:var(--txt)}
+.fg{display:flex;flex-direction:column;gap:4px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gf{grid-column:1/-1}
+.flbl{font-size:10px;font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--txt-d)}
+.finp,.fsel{background:var(--surf2);border:1px solid var(--bdr);border-radius:4px;color:var(--txt);font-family:'Exo 2',sans-serif;font-size:12px;padding:7px 9px;outline:none;width:100%}
+.finp:focus,.fsel:focus{border-color:var(--acc)}
+.fsel option{background:#14181f}
+.fact{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+
+/* ── IMPORT ── */
+.idrop{border:2px dashed var(--bdr);border-radius:6px;padding:22px;text-align:center;cursor:pointer;transition:all .13s;margin-bottom:14px}
+.idrop:hover,.idrop.over{border-color:var(--acc);background:var(--acc-d2)}
+.idico{font-size:28px;margin-bottom:6px}
+.itxt{color:var(--txt-m);font-size:12px;line-height:1.6}
+
+/* ── POS SETUP ── */
+.psrow{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surf2);border:1px solid var(--bdr);border-radius:5px;margin-bottom:8px}
+.pstype{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;min-width:80px}
+.pstype.R{color:var(--rdr)} .pstype.F{color:var(--fgt)} .pstype.S{color:var(--sht)}
+.psstat{font-size:11px;color:var(--txt-d);flex:1}
+.psstat strong{color:var(--txt)}
+
+/* ── BREAKDOWN TABLE ── */
+.btable{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px}
+.btable th{font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--txt-d);text-align:left;padding:5px 8px;border-bottom:1px solid var(--bdr);font-weight:700}
+.btable td{padding:5px 8px;border-bottom:1px solid var(--bdr)}
+.btable tr:last-child td{border-bottom:none}
+.btable tr:hover td{background:var(--surf2)}
+
+/* ── OUTPUT ── */
+.tabs{display:flex;border-bottom:1px solid var(--bdr);background:var(--surf2);margin-bottom:10px}
+.tab{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  padding:9px 16px;border:none;background:transparent;color:var(--txt-d);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .12s}
+.tab.on{color:var(--acc);border-bottom-color:var(--acc)}
+.tab:hover:not(.on){color:var(--txt)}
+.otxt{background:var(--surf2);border:1px solid var(--bdr);border-radius:4px;padding:12px;
+  font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--txt);white-space:pre-wrap;max-height:420px;overflow-y:auto;line-height:1.65}
+.otxt::-webkit-scrollbar{width:3px}
+.otxt::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
+
+/* ── NOTIF ── */
+.notif{position:fixed;bottom:18px;right:18px;z-index:400;background:var(--surf2);border:1px solid var(--acc);border-radius:5px;
+  padding:9px 14px;font-size:12px;color:var(--txt);box-shadow:0 8px 24px rgba(0,0,0,.5);animation:su .18s ease;pointer-events:none}
+@keyframes su{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.est{text-align:center;padding:40px 20px;color:var(--txt-d)}
+.est h3{font-family:'Rajdhani',sans-serif;font-size:17px;color:var(--txt-m);margin-bottom:6px}
+.addpb{width:100%;padding:11px;border:1px dashed var(--bdr);border-radius:6px;background:transparent;color:var(--txt-d);cursor:pointer;
+  font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;
+  display:flex;align-items:center;justify-content:center;gap:7px;transition:all .13s}
+.addpb:hover{border-color:var(--acc);color:var(--acc);background:var(--acc-d2)}
+.ibox{background:var(--surf2);border:1px solid var(--bdr2);border-radius:5px;padding:10px 14px;font-size:12px;color:var(--txt-m);margin-bottom:12px;line-height:1.6}
+.ibox strong{color:var(--acc)}
+/* ── CAPTAIN ASSIGNMENT ── */
+.cap-candidate{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:12px;
+  padding:9px 12px;border:1px solid var(--bdr);border-radius:5px;margin-bottom:6px;background:var(--surf2);transition:all .12s}
+.cap-candidate.selected{border-color:var(--pur);background:rgba(160,96,232,.07)}
+.cap-check{width:18px;height:18px;accent-color:var(--pur);cursor:pointer;flex-shrink:0}
+.cap-info{display:flex;flex-direction:column;gap:2px;min-width:0}
+.cap-name{font-size:13px;font-weight:600;color:var(--txt)}
+.cap-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.cap-rally{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--acc)}
+.cap-assign{display:flex;gap:6px;align-items:center;opacity:.4;transition:opacity .12s;pointer-events:none}
+.cap-candidate.selected .cap-assign{opacity:1;pointer-events:auto}
+.cap-pos-sel,.cap-shift-sel{background:var(--surf3);border:1px solid var(--bdr);border-radius:3px;color:var(--txt);
+  font-family:'Exo 2',sans-serif;font-size:11px;padding:4px 6px;outline:none}
+.cap-pos-sel:focus,.cap-shift-sel:focus{border-color:var(--pur)}
+.cap-pos-sel option,.cap-shift-sel option{background:#14181f}
+.no-caps{text-align:center;padding:20px;color:var(--txt-d);font-size:12px}
+
+/* ── CAPTAIN CLICK-TO-ASSIGN (position setup) ── */
+.cap-card{display:flex;align-items:center;gap:7px;padding:8px 12px;background:var(--surf2);
+  border:2px solid var(--bdr);border-radius:5px;cursor:pointer;transition:all .15s;user-select:none}
+.cap-card:hover{border-color:var(--acc);background:var(--acc-d2)}
+.cap-card.cap-sel{border-color:var(--acc);background:var(--acc-d);box-shadow:0 0 0 3px rgba(232,160,32,.2)}
+.cap-card.cap-done{border-color:var(--grn);background:var(--grn-d);cursor:default}
+.cap-hint{font-size:10px;color:var(--txt-d);font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-left:auto;transition:color .15s}
+.cap-card.cap-sel .cap-hint{color:var(--acc)}
+.cap-card.cap-done .cap-hint{color:var(--grn)}
+.psrow{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--surf2);border:2px solid var(--bdr);border-radius:5px;margin-bottom:8px;transition:all .15s;cursor:pointer}
+.psrow:hover:not(.psrow-filled){border-color:var(--bdr2);background:var(--surf3)}
+.psrow.psrow-ready{border-color:var(--acc);border-style:dashed;background:var(--acc-d2);animation:pulse-slot .9s ease infinite alternate}
+.psrow.psrow-filled{border-color:var(--grn);background:var(--grn-d);cursor:default}
+@keyframes pulse-slot{from{box-shadow:0 0 0 0 rgba(232,160,32,0)}to{box-shadow:0 0 0 5px rgba(232,160,32,.15)}}
+
+select option{background:#161b24}
+
+/* ── MULTI-SELECT ROSTER ── */
+.ri.sel{background:rgba(160,96,232,.1);border-left:2px solid var(--pur)}
+.ri.sel .rn{color:var(--pur)}
+.sel-bar{
+  padding:8px 12px;border-top:1px solid var(--bdr);background:var(--surf2);
+  display:none;flex-shrink:0;flex-direction:column;gap:7px;
+}
+.sel-bar.visible{display:flex}
+.sel-bar-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sel-count{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:.5px;color:var(--pur)}
+.sel-pos-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.sel-pos-btn{
+  font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  padding:3px 8px;border-radius:3px;border:1px solid var(--bdr);background:transparent;color:var(--txt-d);cursor:pointer;transition:all .1s;
+}
+.sel-pos-btn:hover{border-color:var(--pur);color:var(--pur);background:rgba(160,96,232,.1)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">☠ Wasteland King <span class="logo-sub">/ Schedule Manager</span></div>
+  <div class="hbtns">
+    <button class="btn btn-ghost" onclick="openImport()">⬆ Import Excel</button>
+    <button class="btn btn-ghost" onclick="openAddPlayer()">+ Add Player</button>
+    <button class="btn btn-ghost" onclick="openOutput()">⬇ Export</button>
+  </div>
+</header>
+
+<div class="app">
+  <div class="left">
+    <div class="phd">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div class="ptitle">Player Roster</div>
+        <button class="btn btn-danger btn-xs" onclick="clearRoster()">Clear</button>
+      </div>
+      <div class="swrap"><input type="text" id="searchInp" placeholder="Search name or alliance…" oninput="renderRoster()"></div>
+      <div class="filters">
+        <button class="fc fa" id="f-all" onclick="setF('all')">All Types</button>
+        <button class="fc" id="f-R" onclick="setF('R')">Riders</button>
+        <button class="fc" id="f-F" onclick="setF('F')">Fighters</button>
+        <button class="fc" id="f-S" onclick="setF('S')">Shooters</button>
+        <button class="fc" id="f-U" onclick="setF('U')">Unassigned</button>
+        <button class="fc" id="f-C" onclick="setF('C')">Captains</button>
+      </div>
+      <div class="filters" style="margin-top:2px">
+        <button class="fc fa" id="fs-all" onclick="setSF('all')">All Shifts</button>
+        <button class="fc" id="fs-AD" onclick="setSF('AD')">All Day</button>
+        <button class="fc" id="fs-1" onclick="setSF('1')">1st Shift</button>
+        <button class="fc" id="fs-2" onclick="setSF('2')">2nd Shift</button>
+      </div>
+    </div>
+    <div class="rstats" id="rStats"></div>
+    <div class="rscroll" id="rList"></div>
+    <div class="sel-bar" id="selBar">
+      <div class="sel-bar-row">
+        <span class="sel-count" id="selCount">0 selected</span>
+        <button class="btn btn-ghost btn-xs" onclick="clearSelection()">✕ Clear</button>
+        <button class="btn btn-ghost btn-xs" onclick="selectAllVisible()">Select All Visible</button>
+      </div>
+      <div class="sel-bar-row">
+        <span style="font-size:11px;color:var(--txt-d)">Assign to:</span>
+        <div class="sel-pos-row" id="selPosRow"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="shd">
+      <input class="einp" id="eventName" value="WK Schedule" placeholder="Event name…">
+      <div style="margin-left:auto;display:flex;gap:7px">
+        <button class="btn btn-ok btn-sm" onclick="autoAssign()">⚡ Auto-Assign</button>
+        <button class="btn btn-danger btn-sm" onclick="resetAssignments()">✕ Reset All</button>
+        <button class="btn btn-ghost btn-sm" onclick="openPosSetup()">⚙ Positions</button>
+        <button class="btn btn-ghost btn-sm" onclick="openOutput()">⬇ Export</button>
+      </div>
+    </div>
+    <div class="sa" id="schedArea"></div>
+  </div>
+</div>
+
+<!-- ── IMPORT MODAL ── -->
+<div class="mbg" id="mImport" style="display:none" onclick="if(event.target===this)closeImport()">
+  <div class="modal">
+    <button class="mclose" onclick="closeImport()">×</button>
+    <div class="mtitle">Import Roster from Excel</div>
+    <div class="idrop" id="impDrop"
+         onclick="document.getElementById('fileInp').click()"
+         ondragover="event.preventDefault();this.classList.add('over')"
+         ondragleave="this.classList.remove('over')"
+         ondrop="handleDrop(event)">
+      <div class="idico">📊</div>
+      <div class="itxt">Drop your Google Form responses <strong>.xlsx</strong> here<br>
+        <strong style="color:var(--acc)">or click to browse</strong><br>
+        <span style="font-size:10px;color:var(--txt-d)">Auto-detects columns — English &amp; Russian headers supported</span>
+      </div>
+    </div>
+    <input type="file" id="fileInp" accept=".xlsx,.xls" style="display:none" onchange="handleFileSelect(event)">
+    <div id="impStatus" style="display:none">
+      <div id="impSheetWrap" style="display:none;margin-bottom:10px">
+        <div class="fg"><label class="flbl">Sheet with form responses</label>
+          <select class="fsel" id="sheetSel" onchange="previewSheet()"></select></div>
+      </div>
+      <div id="impPreview" style="font-size:12px;color:var(--txt-m);margin-bottom:10px"></div>
+    </div>
+    <div class="fact">
+      <button class="btn btn-ghost" onclick="closeImport()">Cancel</button>
+      <button class="btn btn-primary" id="impBtn" style="display:none" onclick="confirmImport()">Import Players</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── POSITION SETUP MODAL ── -->
+<div class="mbg" id="mPosSetup" style="display:none" onclick="if(event.target===this)closePosSetup()">
+  <div class="modal" style="max-width:680px">
+    <button class="mclose" onclick="closePosSetup()">×</button>
+    <div class="mtitle">Position Setup</div>
+    <div id="psBody"></div>
+    <div class="fact">
+      <button class="btn btn-ghost" onclick="closePosSetup()">Cancel</button>
+      <button class="btn btn-primary" onclick="savePosSetup()">Apply &amp; Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── EDIT POSITION MODAL ── -->
+<div class="mbg" id="mPos" style="display:none" onclick="if(event.target===this)closePosModal()">
+  <div class="modal" style="max-width:460px">
+    <button class="mclose" onclick="closePosModal()">×</button>
+    <div class="mtitle" id="mPosTitle">Edit Position</div>
+    <div class="g2">
+      <div class="fg gf"><label class="flbl">Position Name</label><input class="finp" id="posName"></div>
+      <div class="fg gf"><label class="flbl">Troop Type</label>
+        <select class="fsel" id="posType"><option value="Rider">Riders</option><option value="Fighter">Fighters</option><option value="Shooter">Shooters</option><option value="Mixed">Mixed</option></select></div>
+      <div class="fg gf"><label class="flbl">All-Day Captain</label><input class="finp" id="posCapAD" placeholder="Optional"></div>
+      <div class="fg"><label class="flbl">1st Shift Captain</label><input class="finp" id="posCap1" placeholder="Optional"></div>
+      <div class="fg"><label class="flbl">2nd Shift Captain</label><input class="finp" id="posCap2" placeholder="Optional"></div>
+      <div class="fg"><label class="flbl">Rally Cap — 1st Shift</label><input class="finp" id="posR1" type="number"></div>
+      <div class="fg"><label class="flbl">Rally Cap — 2nd Shift</label><input class="finp" id="posR2" type="number"></div>
+    </div>
+    <div class="fact">
+      <button class="btn btn-ghost" onclick="closePosModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="savePosModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ADD/EDIT PLAYER MODAL ── -->
+<div class="mbg" id="mPlayer" style="display:none" onclick="if(event.target===this)closePlayer()">
+  <div class="modal">
+    <button class="mclose" onclick="closePlayer()">×</button>
+    <div class="mtitle" id="mPlayerTitle">Add Player</div>
+    <div class="g2">
+      <div class="fg"><label class="flbl">Alliance</label><input class="finp" id="pAl" placeholder="e.g. TWS"></div>
+      <div class="fg"><label class="flbl">In-Game Name</label><input class="finp" id="pName" placeholder="Player name"></div>
+      <div class="fg"><label class="flbl">Troop Tier</label>
+        <select class="fsel" id="pTier"><option>T9</option><option selected>T10</option><option>T11</option><option>T12</option><option>T13</option></select></div>
+      <div class="fg"><label class="flbl">Troop Type</label>
+        <select class="fsel" id="pType"><option value="Rider">Rider</option><option value="Fighter">Fighter</option><option value="Shooter">Shooter</option></select></div>
+      <div class="fg"><label class="flbl">Troop Size</label><input class="finp" id="pTroop" type="number" placeholder="e.g. 300000"></div>
+      <div class="fg"><label class="flbl">Rally Size</label><input class="finp" id="pRally" type="number" placeholder="e.g. 1500000"></div>
+      <div class="fg"><label class="flbl">Availability</label>
+        <select class="fsel" id="pAvail"><option value="All Day">All Day</option><option value="1st">1st Shift (10:00–14:00)</option><option value="2nd">2nd Shift (14:00–18:00)</option></select></div>
+      <div class="fg"><label class="flbl">Captain Willing?</label>
+        <select class="fsel" id="pCap"><option value="no">No</option><option value="yes">Yes</option></select></div>
+      <div class="fg gf"><label class="flbl">Notes</label><input class="finp" id="pNotes" placeholder="Additional notes"></div>
+    </div>
+    <div class="fact">
+      <button class="btn btn-danger btn-sm" id="pDelBtn" style="display:none;margin-right:auto" onclick="deletePlayer()">Delete</button>
+      <button class="btn btn-ghost" onclick="closePlayer()">Cancel</button>
+      <button class="btn btn-primary" onclick="savePlayer()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── CAPTAIN ASSIGNMENT MODAL ── -->
+<div class="mbg" id="mCaptain" style="display:none" onclick="if(event.target===this)finalizeCaptains()">
+  <div class="modal" style="max-width:660px">
+    <button class="mclose" onclick="finalizeCaptains()">×</button>
+    <div class="mtitle">Assign Captains</div>
+    <div class="ibox" style="margin-bottom:10px">
+      Players below indicated they are willing to be captain. <strong>Check the ones who will actually serve as captain</strong> for this event — you will assign them to positions in the next step.
+    </div>
+    <div class="ibox" style="margin-bottom:14px;display:flex;flex-direction:column;gap:7px">
+      <div style="font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt-d);margin-bottom:2px">Sign-up breakdown</div>
+      <div id="capDialogStats"></div>
+    </div>
+    <div id="capList"></div>
+    <div style="padding:10px 0 4px;font-size:11px;color:var(--txt-d);border-top:1px solid var(--bdr);margin-top:4px">
+      Players not listed here did not volunteer to be captain.
+    </div>
+    <div class="fact">
+      <button class="btn btn-ghost" onclick="finalizeCaptains()">Skip</button>
+      <button class="btn btn-primary" onclick="finalizeCaptains()">Confirm &amp; Set Up Positions →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── BULK EDIT TROOPS MODAL ── -->
+<div class="mbg" id="mBulkEdit" style="display:none" onclick="if(event.target===this)closeBulkEdit()">
+  <div class="modal" style="max-width:400px">
+    <button class="mclose" onclick="closeBulkEdit()">×</button>
+    <div class="mtitle">Bulk Edit Troops by Tier</div>
+    <div class="ibox" style="margin-bottom:14px" id="bulkEditInfo"></div>
+    <div class="g2">
+      <div class="fg gf">
+        <label class="flbl">Troop Tier</label>
+        <select class="fsel" id="bulkTier">
+          <option value="all">All Tiers</option>
+          <option value="T13">T13</option>
+          <option value="T12">T12</option>
+          <option value="T11">T11</option>
+          <option value="T10">T10</option>
+          <option value="T9">T9</option>
+        </select>
+      </div>
+      <div class="fg gf">
+        <label class="flbl">Set Troop Amount</label>
+        <input class="finp" id="bulkAmount" type="number" placeholder="e.g. 150000"
+          style="font-family:'Share Tech Mono',monospace">
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--txt-d);margin-top:8px">
+      Each player's assigned amount will be capped at their own troop size if the value entered exceeds it.
+    </div>
+    <div class="fact">
+      <button class="btn btn-ghost" onclick="closeBulkEdit()">Cancel</button>
+      <button class="btn btn-primary" onclick="applyBulkEdit()">Update</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── EXPORT MODAL ── -->
+<div class="mbg" id="mOut" style="display:none" onclick="if(event.target===this)closeOut()">
+  <div class="modal" style="max-width:700px">
+    <button class="mclose" onclick="closeOut()">×</button>
+    <div class="mtitle">Export Schedule</div>
+    <div class="tabs">
+      <button class="tab on" id="t-disc" onclick="switchTab('disc')">Discord / Chat</button>
+      <button class="tab" id="t-doc" onclick="switchTab('doc')">Document (.docx)</button>
+    </div>
+    <div id="p-disc">
+      <div class="otxt" id="outDisc"></div>
+      <div class="fact">
+        <button class="btn btn-ghost" onclick="closeOut()">Close</button>
+        <button class="btn btn-primary" onclick="copyOut()">📋 Copy to Clipboard</button>
+      </div>
+    </div>
+    <div id="p-doc" style="display:none">
+      <div class="otxt" id="outDoc"></div>
+      <div class="fact">
+        <button class="btn btn-ghost" onclick="closeOut()">Close</button>
+        <button class="btn btn-ghost" onclick="dlTxt()">⬇ .txt</button>
+        <button class="btn btn-primary" onclick="dlDocx()">⬇ Download .docx</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let players = [];
+let positions = [];       // [{id,name,type,capAD,cap1,cap2,rally1,rally2,allDay[],shift1[],shift2[]}]
+let posSetupSlots = [];   // working copy during position setup modal
+let filterState = 'all';
+let shiftFilter  = 'all';
+let editingPId = null;
+let editingPosId = null;
+let impWB = null, impData = null;
+let dragPid = null;
+let outTab = 'disc';
+
+function uid(){ return Math.random().toString(36).substr(2,9); }
+function fmtN(n){ n=parseInt(n)||0; if(n>=1e6) return (n/1e6).toFixed(1).replace(/\.0$/,'')+'M'; if(n>=1000) return Math.round(n/1000)+'k'; return n.toString(); }
+function fmtFull(n){ return (parseInt(n)||0).toLocaleString('en-US'); }
+function tierNum(t){ const m=String(t||'').match(/(\d+)/); return m?parseInt(m[1]):10; }
+function typeKey(t){ return t==='Rider'?'R':t==='Fighter'?'F':'S'; }
+function typeColor(t){ return t==='Rider'?'var(--rdr)':t==='Fighter'?'var(--fgt)':'var(--sht)'; }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+let selectedPids = new Set();
+
+function toggleSelect(pid, el){
+  if(selectedPids.has(pid)){
+    selectedPids.delete(pid);
+    el.classList.remove('sel');
+  } else {
+    selectedPids.add(pid);
+    el.classList.add('sel');
+  }
+  updateSelBar();
+}
+
+function clearSelection(){
+  selectedPids.clear();
+  document.querySelectorAll('.ri.sel').forEach(el=>el.classList.remove('sel'));
+  updateSelBar();
+}
+
+function selectAllVisible(){
+  getFiltered().filter(p=>!isAsgd(p.id)).forEach(p=>selectedPids.add(p.id));
+  renderRoster();
+}
+
+function updateSelBar(){
+  const bar = document.getElementById('selBar');
+  const countEl = document.getElementById('selCount');
+  const posRow = document.getElementById('selPosRow');
+  if(!bar||!countEl||!posRow) return;
+
+  const n = selectedPids.size;
+  bar.className = 'sel-bar' + (n>0?' visible':'');
+  countEl.textContent = `${n} selected`;
+
+  // Build position + shift buttons
+  if(n>0 && positions.length){
+    posRow.innerHTML = positions.flatMap(pos=>[
+      {pos, sh:'allDay', label:`${pos.name} · All Day`},
+      {pos, sh:'shift1', label:`${pos.name} · 1st`},
+      {pos, sh:'shift2', label:`${pos.name} · 2nd`},
+    ]).map(({pos,sh,label})=>
+      `<button class="sel-pos-btn" onclick="assignSelected('${pos.id}','${sh}')">${label}</button>`
+    ).join('');
+  } else {
+    posRow.innerHTML = positions.length
+      ? ''
+      : '<span style="font-size:11px;color:var(--txt-d);font-style:italic">Set up positions first</span>';
+  }
+}
+
+function assignSelected(posId, sh){
+  if(!selectedPids.size) return;
+  const pos = positions.find(p=>p.id===posId); if(!pos) return;
+  let added = 0;
+  selectedPids.forEach(pid=>{
+    const p = players.find(pl=>pl.id===pid); if(!p) return;
+    rmFromAll(pid);
+    // Get arr AFTER rmFromAll since it replaces the array references
+    const arr = getArr(pos, sh);
+    if(arr.some(a=>a.pid===pid)) return;
+    arr.push({pid, troops:p.troopSize});
+    added++;
+  });
+  clearSelection();
+  renderAll();
+  notify(`Assigned ${added} player${added!==1?'s':''} to ${pos.name} · ${sh==='allDay'?'All Day':sh==='shift1'?'1st Shift':'2nd Shift'}`);
+}
+function setF(f){
+  filterState=f;
+  document.querySelectorAll('.fc[id^="f-"]').forEach(c=>{
+    const id=c.id.replace('f-','');
+    const map={all:'fa',R:'fr',F:'ff',S:'fs',U:'fu',C:'fcp'};
+    c.className='fc'+(id===f?' '+map[id]:'');
+  });
+  renderRoster();
+}
+function setSF(f){
+  shiftFilter=f;
+  document.querySelectorAll('.fc[id^="fs-"]').forEach(c=>{
+    const id=c.id.replace('fs-','');
+    const map={all:'fa',AD:'fsh',1:'fsh',2:'fsh'};
+    c.className='fc'+(id===f?' '+(map[id]||'fa'):'');
+  });
+  renderRoster();
+}
+function isAsgd(pid){
+  // Check if in any position's troop slots
+  if(positions.some(p=>p.allDay.some(a=>a.pid===pid)||p.shift1.some(a=>a.pid===pid)||p.shift2.some(a=>a.pid===pid))) return true;
+  // Check if assigned as captain to any position (stored as name string)
+  const player = players.find(p=>p.id===pid);
+  if(!player) return false;
+  const capName = `[${player.alliance}] ${player.name}`;
+  return positions.some(p=>p.capAD===capName||p.cap1===capName||p.cap2===capName);
+}
+function getFiltered(){
+  const q=(document.getElementById('searchInp')?.value||'').toLowerCase();
+  return players.filter(p=>{
+    if(q&&!p.name.toLowerCase().includes(q)&&!p.alliance.toLowerCase().includes(q)) return false;
+    // Type / status filter
+    if(filterState==='R'&&p.type!=='Rider') return false;
+    if(filterState==='F'&&p.type!=='Fighter') return false;
+    if(filterState==='S'&&p.type!=='Shooter') return false;
+    if(filterState==='U'&&isAsgd(p.id)) return false;
+    if(filterState==='C'&&p.captain!=='yes') return false;
+    // Shift filter
+    if(shiftFilter==='AD'&&p.avail!=='All Day') return false;
+    if(shiftFilter==='1'&&p.avail!=='1st') return false;
+    if(shiftFilter==='2'&&p.avail!=='2nd') return false;
+    return true;
+  });
+}
+function renderRoster(){
+  const t=players.length, a=players.filter(p=>isAsgd(p.id)).length;
+  document.getElementById('rStats').innerHTML=`
+    <div class="st"><strong>${t}</strong>total</div>
+    <div class="st"><strong style="color:var(--grn)">${a}</strong>assigned</div>
+    <div class="st"><strong style="color:var(--red)">${t-a}</strong>free</div>
+    <div class="st"><strong style="color:var(--rdr)">${players.filter(p=>p.type==='Rider').length}</strong>R</div>
+    <div class="st"><strong style="color:var(--fgt)">${players.filter(p=>p.type==='Fighter').length}</strong>F</div>
+    <div class="st"><strong style="color:var(--sht)">${players.filter(p=>p.type==='Shooter').length}</strong>S</div>`;
+  const list=document.getElementById('rList'), fl=getFiltered();
+  if(!fl.length){ list.innerHTML=`<div class="est"><h3>${players.length?'No matches':'No Players'}</h3><p>${players.length?'Adjust filters or search.':'Import from Excel or add manually.'}</p></div>`; return; }
+  list.innerHTML=fl.map(p=>{
+    const asgd=isAsgd(p.id), avL=p.avail==='All Day'?'All Day':p.avail==='1st'?'10:00–14:00':'14:00–18:00';
+    const isSel = selectedPids.has(p.id);
+    return `<div class="ri ${asgd?'asgd':''} ${isSel?'sel':''}" draggable="true"
+      ondragstart="dStart(event,'${p.id}')"
+      onclick="toggleSelect('${p.id}',this)"
+      ondblclick="editPlayer('${p.id}')">
+      <div class="rn">${esc(p.name)}</div>
+      <div class="rm">
+        <span class="tag tgal">${esc(p.alliance)}</span>
+        <span class="tag tgti">${p.tier}</span>
+        <span class="tag tg${typeKey(p.type)}">${p.type}</span>
+        ${p.captain==='yes'?'<span class="tag tgcp">CAP</span>':''}
+        <span class="rt">${fmtN(p.troopSize)}</span>
+        <span class="rav">⏱ ${avL}</span>
+      </div>
+      ${p.notes?`<div class="rnote">${esc(p.notes)}</div>`:''}
+    </div>`;
+  }).join('');
+  updateSelBar();
+}
+
+// ═══════════════════════════════════════════════════════
+// DRAG & DROP
+// ═══════════════════════════════════════════════════════
+function dStart(e,pid){ dragPid=pid; e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',pid); }
+function dOver(e,posId,sh){ e.preventDefault(); document.querySelectorAll('.dz').forEach(d=>d.classList.remove('over')); document.getElementById(`dz-${posId}-${sh}`)?.classList.add('over'); }
+function dLeave(posId,sh){ document.getElementById(`dz-${posId}-${sh}`)?.classList.remove('over'); }
+function dDrop(e,posId,sh){
+  e.preventDefault(); document.querySelectorAll('.dz').forEach(d=>d.classList.remove('over'));
+  const pid=dragPid||e.dataTransfer.getData('text/plain'); if(!pid) return;
+  const p=players.find(pl=>pl.id===pid); if(!p) return;
+  rmFromAll(pid);
+  const pos=positions.find(po=>po.id===posId); if(!pos) return;
+  getArr(pos,sh).push({pid,troops:p.troopSize});
+  renderAll();
+}
+function rmFromAll(pid){ positions.forEach(pos=>{ pos.allDay=pos.allDay.filter(a=>a.pid!==pid); pos.shift1=pos.shift1.filter(a=>a.pid!==pid); pos.shift2=pos.shift2.filter(a=>a.pid!==pid); }); }
+function getArr(pos,sh){ return sh==='allDay'?pos.allDay:sh==='shift1'?pos.shift1:pos.shift2; }
+function rmAsgn(posId,sh,pid){ const pos=positions.find(p=>p.id===posId); if(!pos) return; pos[sh==='allDay'?'allDay':sh==='shift1'?'shift1':'shift2']=getArr(pos,sh).filter(a=>a.pid!==pid); renderAll(); }
+
+function updTroops(posId,sh,pid,val){
+  const pos=positions.find(p=>p.id===posId); if(!pos) return;
+  const a=getArr(pos,sh).find(a=>a.pid===pid); if(!a) return;
+  const pl=players.find(p=>p.id===pid);
+  let n=parseInt(String(val).replace(/[^0-9]/g,''))||0;
+  if(pl&&n>pl.troopSize){ n=pl.troopSize; notify(`Capped at player max: ${fmtN(n)}`); }
+  a.troops=n; updCounts(posId);
+}
+function updCounts(posId){
+  const pos=positions.find(p=>p.id===posId); if(!pos) return;
+  const adTotal=pos.allDay.reduce((s,a)=>s+(a.troops||0),0);
+  ['allDay','shift1','shift2'].forEach(sh=>{
+    const arr=getArr(pos,sh);
+    const ownTotal=arr.reduce((s,a)=>s+(a.troops||0),0);
+    // For shift displays, add allDay troops since they participate in both shifts
+    const total=sh==='allDay'?ownTotal:ownTotal+adTotal;
+    const rally=sh==='shift1'?pos.rally1:sh==='shift2'?pos.rally2:0;
+    const el=document.getElementById(`cnt-${posId}-${sh}`), bar=document.getElementById(`bar-${posId}-${sh}`);
+    if(el){ const cls=rally>0?(total>rally?'cover':total>=rally*.88?'cok':'cund'):''; el.className='scnt '+cls; el.textContent=fmtN(total)+(rally>0?' / '+fmtN(rally):''); }
+    if(bar){ const pct=rally>0?Math.min(100,Math.round(total/rally*100)):0; const bc=total>rally?'rbov':total>=rally*.88?'rbok':'rbun'; bar.style.width=pct+'%'; bar.className='rbf '+bc; }
+  });
+}
+function updCap(posId,sh,val){ const pos=positions.find(p=>p.id===posId); if(!pos) return; if(sh==='allDay') pos.capAD=val; else if(sh==='shift1') pos.cap1=val; else pos.cap2=val; }
+function updRally(posId,sh,val){ const pos=positions.find(p=>p.id===posId); if(!pos) return; const n=parseInt(val)||0; if(sh==='shift1') pos.rally1=n; else if(sh==='shift2') pos.rally2=n; updCounts(posId); }
+
+// ═══════════════════════════════════════════════════════
+// AUTO-ASSIGN
+// Tier priority: T13 → T12 → T11 → T10 → T9
+// Each player gets their FULL troop size until rally cap is reached
+// Lower tiers fill remaining gap after higher tiers are fully placed
+// Troop count is always capped at the player's own troopSize
+// ═══════════════════════════════════════════════════════
+function autoAssign(){
+  let count=0;
+  for(const pos of positions){
+    for(const [sh, rally] of [['shift1',pos.rally1],['shift2',pos.rally2]]){
+      if(!rally) continue;
+      const arr=getArr(pos,sh);
+      const avKey=sh==='shift1'?'1st':'2nd';
+      const candidates=players.filter(p=>{
+        if(isAsgd(p.id)) return false;
+        if(pos.type!=='Mixed'&&p.type!==pos.type) return false;
+        return p.avail==='All Day'||p.avail===avKey;
+      });
+      // Sort by tier DESC, then troopSize DESC within same tier
+      candidates.sort((a,b)=>{
+        const td=tierNum(b.tier)-tierNum(a.tier);
+        return td!==0?td:b.troopSize-a.troopSize;
+      });
+      let remaining=rally-arr.reduce((s,a)=>s+(a.troops||0),0);
+      for(const p of candidates){
+        if(remaining<=0) break;
+        // Give full troop size if it fits; otherwise fill the gap
+        const troops=Math.min(p.troopSize, remaining);
+        arr.push({pid:p.id, troops});
+        remaining-=troops;
+        count++;
+      }
+    }
+  }
+  renderAll();
+  notify(count>0?`⚡ Auto-assigned ${count} players`:'No eligible players found — check rally caps are set on each shift');
+}
+
+function resetAssignments(){
+  if(!confirm('Reset all troop assignments? Captains will stay assigned to their positions.')) return;
+
+  // Build set of captain player IDs so we can keep them
+  const capNames = new Set();
+  positions.forEach(p=>{
+    if(p.capAD) capNames.add(p.capAD);
+    if(p.cap1)  capNames.add(p.cap1);
+    if(p.cap2)  capNames.add(p.cap2);
+  });
+  const isCaptainPid = pid => {
+    const p = players.find(pl=>pl.id===pid);
+    if(!p) return false;
+    return capNames.has(`[${p.alliance}] ${p.name}`);
+  };
+
+  // Clear all troop slot arrays, keeping only captain entries if they were dragged in
+  positions.forEach(pos=>{
+    pos.allDay = pos.allDay.filter(a=>isCaptainPid(a.pid));
+    pos.shift1 = pos.shift1.filter(a=>isCaptainPid(a.pid));
+    pos.shift2 = pos.shift2.filter(a=>isCaptainPid(a.pid));
+  });
+
+  renderAll();
+  notify('Assignments reset — captains preserved');
+}
+
+// ═══════════════════════════════════════════════════════
+// POSITION SETUP MODAL
+// Shows breakdown by type and lets user manually name each slot
+// ═══════════════════════════════════════════════════════
+// ─── POSITION DISTRIBUTION LOGIC ───────────────────────────────────────────
+//
+//  Hub (1 slot)  →  troop type with the HIGHEST average tier (strongest)
+//
+//  Remaining 4 slots  →  the 2 MOST COMMON types by submission count,
+//                        2 slots each.
+//
+//  The Hub type is determined independently of the count ranking.
+//  If the strongest type also happens to be the most common, it still only
+//  gets 1 slot (Hub). The remaining 4 go to the top-2 by count.
+//
+//  Examples:
+//    fighter(most), rider(2nd), shooter(strongest/least)
+//    → Hub=Shooter · fighter×2 · rider×2
+//
+//    fighter(most), rider(2nd/strongest), shooter(least)
+//    → Hub=Rider · fighter×2 · rider×1 (East) · shooter×1 (→ fills 4th slot)
+//      Wait — remaining 4 must be top-2 by count × 2 each = fighter×2 + rider×2
+//      Hub rider is separate; rider also appears in North or West.
+//    → Hub=Rider · fighter×2 · rider×2  (shooter gets 0 non-hub positions)
+//
+// ─────────────────────────────────────────────────────────────────────────────
+
+function buildBreakdown(){
+  // Returns array of {type, count, avgTier, avgTroops, t11plus}
+  // sorted by count DESC (most common first)
+  return ['Rider','Fighter','Shooter'].map(type=>{
+    const group=players.filter(p=>p.type===type);
+    const count=group.length;
+    const avgTier=count?group.reduce((s,p)=>s+tierNum(p.tier),0)/count:0;
+    const avgTroops=count?Math.round(group.reduce((s,p)=>s+p.troopSize,0)/count):0;
+    const t11plus=group.filter(p=>tierNum(p.tier)>=11).length;
+    return {type,count,avgTier,avgTroops,t11plus};
+  }).sort((a,b)=>b.count-a.count);
+}
+
+function buildSlotPlan(breakdown){
+  // 1. Hub = highest avgTier type
+  const strongest=[...breakdown].sort((a,b)=>b.avgTier-a.avgTier)[0].type;
+
+  // 2. Remaining 4 = top 2 by count, 2 slots each
+  const top2=breakdown.slice(0,2).map(b=>b.type);
+
+  // Build the 5-slot plan in display order:
+  // Hub first, then pairs for top-2 by count
+  const plan=[];
+  plan.push({type:strongest, role:'hub', label:'Hub'});
+  top2.forEach(type=>{
+    plan.push({type, role:'field', label:''});
+    plan.push({type, role:'field', label:''});
+  });
+  return {plan, hubType:strongest, top2};
+}
+
+function openPosSetup(){
+  const breakdown=buildBreakdown();
+  const {plan}=buildSlotPlan(breakdown);
+
+  // Build posSetupSlots, reusing existing position data where type+role match
+  const existingByType={};
+  positions.forEach(p=>{ if(!existingByType[p.type]) existingByType[p.type]=[]; existingByType[p.type].push(p); });
+  const usedIds=new Set();
+
+  const fieldNames = ['North','South','East','West'];
+  let fieldNameIdx = 0;
+
+  posSetupSlots=plan.map(slot=>{
+    const pool=(existingByType[slot.type]||[]).filter(p=>!usedIds.has(p.id));
+    const existing=slot.role==='hub'
+      ? (pool.find(p=>p.name==='Hub')||pool[0])
+      : pool[0];
+    if(existing) usedIds.add(existing.id);
+
+    // Determine the slot's name: existing name, 'Hub' for hub role, or next field name
+    let slotName;
+    if(existing) {
+      slotName = existing.name;
+    } else if(slot.role==='hub') {
+      slotName = 'Hub';
+    } else {
+      slotName = fieldNames[fieldNameIdx++] || '';
+    }
+
+    // Pull pending captain data for this slot name (if any)
+    const pend = (window.pendingCaptains && slotName) ? (window.pendingCaptains[slotName] || {}) : {};
+
+    return {
+      id:     existing ? existing.id : uid(),
+      type:   slot.type,
+      role:   slot.role,
+      name:   slotName,
+      capId:  '', // set via captain dropdown in position setup
+      capAD:  existing ? existing.capAD : '',
+      cap1:   existing ? existing.cap1  : '',
+      cap2:   existing ? existing.cap2  : '',
+      rally1: existing ? existing.rally1 : 0,
+      rally2: existing ? existing.rally2 : 0,
+      allDay: existing ? existing.allDay : [],
+      shift1: existing ? existing.shift1 : [],
+      shift2: existing ? existing.shift2 : [],
+    };
+  });
+
+  // ── Auto-assign captains where counts match exactly per type ──
+  // Group confirmed captains by troop type
+  const confirmed = window.confirmedCaptains || [];
+  const capsByType = {};
+  confirmed.forEach(cap => {
+    if(!capsByType[cap.type]) capsByType[cap.type] = [];
+    capsByType[cap.type].push(cap);
+  });
+
+  // For each type, if number of captains == number of unfilled slots → assign all in order
+  Object.entries(capsByType).forEach(([type, caps]) => {
+    const matchingSlots = posSetupSlots.filter(s => s.type === type && !s.capId);
+    if(caps.length === matchingSlots.length) {
+      caps.forEach((cap, i) => {
+        pssSetCaptain(posSetupSlots.indexOf(matchingSlots[i]), cap.id);
+      });
+    }
+    // If counts don't match, leave for manual assignment
+  });
+
+  renderPosSetupModal(breakdown);
+  document.getElementById('mPosSetup').style.display='flex';
+}
+
+function renderPosSetupModal(breakdown){
+  const {hubType,top2}=buildSlotPlan(breakdown);
+  const total=players.length||1;
+  const allNames=['Hub','North','South','East','West'];
+  const confirmed = window.confirmedCaptains || [];
+
+  let html = '';
+
+  // ── Confirmed Captains section ──
+  if(confirmed.length){
+    html += `<div style="margin-bottom:18px">
+      <div style="font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt-d);margin-bottom:6px">
+        Confirmed Captains — <span style="color:var(--acc);font-size:11px">Click a captain to select, then click a position to assign</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px" id="capCardsWrap">
+        ${confirmed.map(p=>{
+          const isAssigned = posSetupSlots.some(s=>s.capId===p.id);
+          const cls = isAssigned ? 'cap-done' : '';
+          const hint = isAssigned ? '✓ Assigned' : 'Click to select';
+          return `<div class="cap-card ${cls}" id="capcard-${p.id}" onclick="psSelectCaptain('${p.id}')">
+            <span class="tag tgal">${esc(p.alliance)}</span>
+            <span style="font-size:13px;font-weight:600;color:var(--acc2)">${esc(p.name)}</span>
+            <span class="tag tg${typeKey(p.type)}">${p.type}</span>
+            <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--txt-m)">Rally: ${fmtFull(p.rallySize)}</span>
+            <span class="cap-hint" id="caphint-${p.id}">${hint}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }
+
+  // ── Breakdown table ──
+  html+=`<div class="ibox" style="margin-bottom:14px">
+    <strong>Troop type breakdown</strong>
+    <table class="btable" style="margin-top:8px">
+      <tr><th>Type</th><th>Count</th><th>%</th><th>Avg Tier</th><th>Avg Troops</th><th>T11+</th><th>Role</th></tr>
+      ${breakdown.map(b=>{
+        const pct=Math.round(b.count/total*100);
+        const isHub=b.type===hubType, isTop2=top2.includes(b.type);
+        const role=isHub&&isTop2?'<span style="color:var(--acc)">Hub + 2 field</span>':
+                   isHub?'<span style="color:var(--acc)">Hub only</span>':
+                   isTop2?'<span style="color:var(--grn)">2 field slots</span>':
+                   '<span style="color:var(--txt-d)">0 slots</span>';
+        return `<tr>
+          <td><strong style="color:${typeColor(b.type)}">${b.type}s</strong>${b.type===hubType?' <span style="font-size:9px;color:var(--acc)">[STRONGEST]</span>':''}</td>
+          <td><strong>${b.count}</strong></td><td>${pct}%</td>
+          <td>T${b.avgTier.toFixed(1)}</td><td>${fmtN(b.avgTroops)}</td><td>${b.t11plus}</td>
+          <td>${role}</td></tr>`;
+      }).join('')}
+    </table>
+    <div style="margin-top:8px;font-size:11px;color:var(--txt-d)">
+      <strong style="color:var(--acc)">Hub</strong> → strongest avg tier &nbsp;·&nbsp;
+      <strong>Remaining 4</strong> → top 2 most common types, 2 slots each.
+      Name each position below, then assign a captain by clicking.
+    </div>
+  </div>`;
+
+  // ── Position slot rows ──
+  posSetupSlots.forEach((s,i)=>{
+    const b=breakdown.find(x=>x.type===s.type)||{count:0,avgTier:0,avgTroops:0,t11plus:0};
+    const isHub=s.role==='hub';
+    const nameOpts=allNames.map(n=>`<option value="${n}" ${s.name===n?'selected':''}>${n}</option>`).join('');
+    const roleBadge=isHub
+      ?`<span style="font-size:10px;font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:2px 6px;border-radius:2px;background:var(--acc-d);color:var(--acc);border:1px solid rgba(232,160,32,.4)">HUB</span>`
+      :`<span style="font-size:10px;font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:2px 6px;border-radius:2px;background:var(--grn-d);color:var(--grn);border:1px solid rgba(56,200,112,.3)">FIELD</span>`;
+
+    const selCap = (window.confirmedCaptains||[]).find(p=>p.id===s.capId);
+    const isFilled = !!selCap;
+    const rowCls = isFilled ? 'psrow psrow-filled' : 'psrow';
+
+    // Captain display area inside the row
+    const capDisplay = selCap
+      ? `<div style="display:flex;align-items:center;gap:7px;margin-top:4px">
+           <span style="font-size:10px;color:var(--grn);font-family:'Rajdhani',sans-serif;font-weight:700">CAPTAIN</span>
+           <span class="tag tgal">${esc(selCap.alliance)}</span>
+           <span style="font-size:12px;font-weight:600;color:var(--grn)">${esc(selCap.name)}</span>
+           <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txt-m)">Rally: ${fmtFull(selCap.rallySize)}</span>
+           <button onclick="event.stopPropagation();psUnassignCaptain(${i})" style="background:none;border:none;color:var(--txt-d);cursor:pointer;font-size:12px;margin-left:auto" title="Remove captain">×</button>
+         </div>`
+      : `<div style="font-size:11px;color:var(--txt-d);margin-top:4px;font-style:italic">No captain assigned — select a captain above then click here</div>`;
+
+    html+=`<div class="${rowCls}" id="psrow-${i}" onclick="psAssignCaptain(${i})">
+      <div style="min-width:90px;flex-shrink:0">
+        <div class="pstype ${typeKey(s.type)}">${s.type}s</div>
+        <div style="margin-top:4px">${roleBadge}</div>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px" onclick="event.stopPropagation()">
+          <div class="fg"><label class="flbl">Position Name</label>
+            <select class="fsel" style="font-size:12px;padding:5px 8px" onchange="pssSetName(${i},this.value)">
+              <option value="">— Select —</option>${nameOpts}
+            </select></div>
+          <div class="fg" style="justify-content:flex-end">
+            <label class="flbl">Type stats</label>
+            <span style="font-size:11px;color:var(--txt-d)">${b.count} players · avg T${b.avgTier.toFixed(1)} · <strong style="color:var(--acc)">${b.t11plus}</strong> T11+</span>
+          </div>
+        </div>
+        ${capDisplay}
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:2px" onclick="event.stopPropagation()">
+          <div class="fg"><label class="flbl">1st Shift Captain</label>
+            <input class="finp inp-cap1" style="font-size:11px;padding:4px 7px;color:var(--txt-d);background:var(--surf3)" value="${esc(selCap?`[${selCap.alliance}] ${selCap.name}`:(s.cap1||''))}" placeholder="Auto-filled" readonly></div>
+          <div class="fg"><label class="flbl">2nd Shift Captain</label>
+            <input class="finp inp-cap2" style="font-size:11px;padding:4px 7px;color:var(--txt-d);background:var(--surf3)" value="${esc(selCap?`[${selCap.alliance}] ${selCap.name}`:(s.cap2||''))}" placeholder="Auto-filled" readonly></div>
+          <div class="fg"><label class="flbl" style="color:var(--acc)">Rally Cap (both shifts)</label>
+            <input class="finp inp-rally1" style="font-size:11px;padding:4px 7px;font-family:'Share Tech Mono',monospace" type="number" value="${s.rally1||''}" oninput="pssSet(${i},'rally1',+this.value||0);pssSet(${i},'rally2',+this.value||0);document.querySelector('#psrow-${i} .inp-rally2').value=this.value" placeholder="e.g. 2180000"></div>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('psBody').innerHTML=html;
+}
+
+function pssSet(i,key,val){ if(posSetupSlots[i]) posSetupSlots[i][key]=val; }
+
+function pssSetName(i, name){
+  if(!posSetupSlots[i]) return;
+  posSetupSlots[i].name = name;
+}
+
+function pssSetCaptain(i, capId){
+  if(!posSetupSlots[i]) return;
+  const cap=(window.confirmedCaptains||[]).find(p=>p.id===capId);
+  const capName=cap?`[${cap.alliance}] ${cap.name}`:'';
+  const rally=cap?(cap.rallySize||0):0;
+  posSetupSlots[i].capId=capId;
+  posSetupSlots[i].cap1=capName;
+  posSetupSlots[i].cap2=capName;
+  posSetupSlots[i].rally1=rally;
+  posSetupSlots[i].rally2=rally;
+}
+let psSelectedCapId = null;
+
+function psSelectCaptain(capId){
+  const confirmed = window.confirmedCaptains || [];
+  const cap = confirmed.find(p=>p.id===capId);
+  if(!cap) return;
+
+  // Already fully assigned — clicking again de-selects or does nothing
+  const alreadyAssigned = posSetupSlots.some(s=>s.capId===capId);
+  if(alreadyAssigned) return;
+
+  // Toggle selection
+  if(psSelectedCapId===capId){
+    psSelectedCapId=null;
+  } else {
+    psSelectedCapId=capId;
+  }
+
+  // Update all captain card visuals
+  confirmed.forEach(p=>{
+    const card=document.getElementById(`capcard-${p.id}`);
+    const hint=document.getElementById(`caphint-${p.id}`);
+    if(!card||!hint) return;
+    const isDone=posSetupSlots.some(s=>s.capId===p.id);
+    const isSel=psSelectedCapId===p.id;
+    card.className='cap-card'+(isDone?' cap-done':isSel?' cap-sel':'');
+    hint.textContent=isDone?'✓ Assigned':isSel?'Now click a position →':'Click to select';
+  });
+
+  // Pulse all unfilled position rows to show they're clickable
+  posSetupSlots.forEach((_,i)=>{
+    const row=document.getElementById(`psrow-${i}`);
+    if(!row) return;
+    const isFilled=!!posSetupSlots[i].capId;
+    row.className='psrow'+(isFilled?' psrow-filled':psSelectedCapId?' psrow-ready':'');
+  });
+}
+
+function psAssignCaptain(slotIdx){
+  if(!psSelectedCapId) return; // no captain selected yet — ignore click
+  const slot=posSetupSlots[slotIdx];
+  if(!slot||slot.capId) return; // slot already has a captain
+
+  const cap=(window.confirmedCaptains||[]).find(p=>p.id===psSelectedCapId);
+  if(!cap) return;
+
+  // Assign
+  pssSetCaptain(slotIdx, psSelectedCapId);
+  psSelectedCapId=null;
+
+  // Re-render to reflect the new state
+  const breakdown=buildBreakdown();
+  renderPosSetupModal(breakdown);
+}
+
+function psUnassignCaptain(slotIdx){
+  const slot=posSetupSlots[slotIdx];
+  if(!slot) return;
+  slot.capId=''; slot.cap1=''; slot.cap2=''; slot.rally1=0; slot.rally2=0;
+  const breakdown=buildBreakdown();
+  renderPosSetupModal(breakdown);
+}
+
+function savePosSetup(){
+  const unnamed=posSetupSlots.filter(s=>!s.name);
+  if(unnamed.length){ notify(`Assign a name to all ${unnamed.length} remaining slot${unnamed.length>1?'s':''}`); return; }
+  const names=posSetupSlots.map(s=>s.name);
+  if(new Set(names).size!==names.length){ notify('Each position must have a unique name — check for duplicates'); return; }
+
+  const confirmed = window.confirmedCaptains || [];
+
+  positions=posSetupSlots.map(s=>{
+    const cap = confirmed.find(p=>p.id===s.capId);
+    const capName = cap ? `[${cap.alliance}] ${cap.name}` : (s.capAD || '');
+    const rally = cap ? (cap.rallySize || 0) : 0;
+    return {
+      id: s.id||uid(), name: s.name, type: s.type,
+      capAD: capName,
+      cap1:  s.cap1 || capName,
+      cap2:  s.cap2 || capName,
+      rally1: s.rally1 || rally,
+      rally2: s.rally2 || rally,
+      allDay: s.allDay||[], shift1: s.shift1||[], shift2: s.shift2||[]
+    };
+  });
+
+  // Clear pending state
+  window.confirmedCaptains = [];
+  window.pendingCaptains = {};
+
+  closePosSetup(); renderAll(); notify('Positions saved');
+}
+function closePosSetup(){ document.getElementById('mPosSetup').style.display='none'; posSetupSlots=[]; }
+
+// ═══════════════════════════════════════════════════════
+// EDIT SINGLE POSITION MODAL
+// ═══════════════════════════════════════════════════════
+function openEditPos(posId){
+  const pos=positions.find(p=>p.id===posId); if(!pos) return;
+  editingPosId=posId;
+  document.getElementById('mPosTitle').textContent=`Edit — ${pos.name}`;
+  document.getElementById('posName').value=pos.name;
+  document.getElementById('posType').value=pos.type;
+  document.getElementById('posCapAD').value=pos.capAD||'';
+  document.getElementById('posCap1').value=pos.cap1||'';
+  document.getElementById('posCap2').value=pos.cap2||'';
+  document.getElementById('posR1').value=pos.rally1||'';
+  document.getElementById('posR2').value=pos.rally2||'';
+  document.getElementById('mPos').style.display='flex';
+}
+function closePosModal(){ document.getElementById('mPos').style.display='none'; }
+function savePosModal(){
+  const pos=positions.find(p=>p.id===editingPosId); if(!pos) return;
+  pos.name=document.getElementById('posName').value.trim()||pos.name;
+  pos.type=document.getElementById('posType').value;
+  pos.capAD=document.getElementById('posCapAD').value.trim();
+  pos.cap1=document.getElementById('posCap1').value.trim();
+  pos.cap2=document.getElementById('posCap2').value.trim();
+  pos.rally1=parseInt(document.getElementById('posR1').value)||0;
+  pos.rally2=parseInt(document.getElementById('posR2').value)||0;
+  closePosModal(); renderAll();
+}
+
+// ═══════════════════════════════════════════════════════
+// PLAYER MODAL
+// ═══════════════════════════════════════════════════════
+function openAddPlayer(){
+  editingPId=null;
+  document.getElementById('mPlayerTitle').textContent='Add Player';
+  document.getElementById('pDelBtn').style.display='none';
+  ['pAl','pName','pNotes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('pTier').value='T10';
+  document.getElementById('pType').value='Rider';
+  document.getElementById('pTroop').value='';
+  document.getElementById('pRally').value='';
+  document.getElementById('pAvail').value='All Day';
+  document.getElementById('pCap').value='no';
+  document.getElementById('mPlayer').style.display='flex';
+}
+function editPlayer(id){
+  const p=players.find(pl=>pl.id===id); if(!p) return;
+  editingPId=id;
+  document.getElementById('mPlayerTitle').textContent='Edit Player';
+  document.getElementById('pDelBtn').style.display='inline-flex';
+  document.getElementById('pAl').value=p.alliance;
+  document.getElementById('pName').value=p.name;
+  document.getElementById('pTier').value=p.tier;
+  document.getElementById('pType').value=p.type;
+  document.getElementById('pTroop').value=p.troopSize||'';
+  document.getElementById('pRally').value=p.rallySize||'';
+  document.getElementById('pAvail').value=p.avail;
+  document.getElementById('pCap').value=p.captain;
+  document.getElementById('pNotes').value=p.notes||'';
+  document.getElementById('mPlayer').style.display='flex';
+}
+function closePlayer(){ document.getElementById('mPlayer').style.display='none'; }
+function savePlayer(){
+  const name=document.getElementById('pName').value.trim(); if(!name) return notify('Enter a player name');
+  const data={
+    alliance:document.getElementById('pAl').value.trim().toUpperCase(), name,
+    tier:document.getElementById('pTier').value, type:document.getElementById('pType').value,
+    troopSize:parseInt(document.getElementById('pTroop').value)||0,
+    rallySize:parseInt(document.getElementById('pRally').value)||0,
+    avail:document.getElementById('pAvail').value, captain:document.getElementById('pCap').value,
+    notes:document.getElementById('pNotes').value.trim()
+  };
+  if(editingPId){
+    const idx=players.findIndex(p=>p.id===editingPId); if(idx>=0) players[idx]={id:editingPId,...data};
+    // Enforce troop cap on existing assignments
+    positions.forEach(pos=>['allDay','shift1','shift2'].forEach(sh=>{
+      const a=getArr(pos,sh).find(a=>a.pid===editingPId); if(a&&a.troops>data.troopSize) a.troops=data.troopSize;
+    }));
+  } else { players.push({id:uid(),...data}); }
+  closePlayer(); renderAll(); notify(editingPId?'Player updated':'Player added');
+}
+function deletePlayer(){
+  if(!editingPId||!confirm('Delete this player?')) return;
+  players=players.filter(p=>p.id!==editingPId); rmFromAll(editingPId);
+  closePlayer(); renderAll(); notify('Player deleted');
+}
+
+// ═══════════════════════════════════════════════════════
+// IMPORT
+// ═══════════════════════════════════════════════════════
+function openImport(){ document.getElementById('mImport').style.display='flex'; }
+function closeImport(){
+  document.getElementById('mImport').style.display='none';
+  impWB=null; impData=null;
+  document.getElementById('impStatus').style.display='none';
+  document.getElementById('impBtn').style.display='none';
+  document.getElementById('impSheetWrap').style.display='none';
+  document.getElementById('impPreview').textContent='';
+  document.getElementById('fileInp').value='';
+}
+function handleDrop(e){ e.preventDefault(); document.getElementById('impDrop').classList.remove('over'); processFile(e.dataTransfer.files[0]); }
+function handleFileSelect(e){ processFile(e.target.files[0]); }
+function processFile(file){
+  if(!file) return;
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      impWB=XLSX.read(e.target.result,{type:'array',cellDates:true});
+      const sheets=impWB.SheetNames;
+      const sel=document.getElementById('sheetSel');
+      sel.innerHTML=sheets.map(s=>`<option value="${s}">${s}</option>`).join('');
+      const auto=sheets.find(s=>/form|response|ответ/i.test(s))||sheets[sheets.length-1];
+      sel.value=auto;
+      document.getElementById('impStatus').style.display='block';
+      document.getElementById('impSheetWrap').style.display=sheets.length>1?'block':'none';
+      previewSheet();
+    } catch(err){ notify('Error reading file: '+err.message); }
+  };
+  r.readAsArrayBuffer(file);
+}
+function previewSheet(){
+  const sn=document.getElementById('sheetSel').value;
+  const ws=impWB.Sheets[sn];
+  const data=XLSX.utils.sheet_to_json(ws,{defval:null});
+  impData=parseForm(data);
+  const dupes=impData.filter(p=>players.some(ex=>ex.name.toLowerCase()===p.name.toLowerCase())).length;
+  const counts={Rider:impData.filter(p=>p.type==='Rider').length,Fighter:impData.filter(p=>p.type==='Fighter').length,Shooter:impData.filter(p=>p.type==='Shooter').length};
+  document.getElementById('impPreview').innerHTML=
+    `Found <strong style="color:var(--grn)">${impData.length} players</strong>${dupes?` <span style="color:var(--red)">(${dupes} duplicates will be skipped)</span>`:''}<br>
+    <span style="color:var(--rdr)">Riders: ${counts.Rider}</span> &nbsp;·&nbsp; 
+    <span style="color:var(--fgt)">Fighters: ${counts.Fighter}</span> &nbsp;·&nbsp; 
+    <span style="color:var(--sht)">Shooters: ${counts.Shooter}</span>`;
+  document.getElementById('impBtn').style.display=impData.length?'inline-flex':'none';
+}
+function parseForm(rows){
+  if(!rows.length) return [];
+  const keys=Object.keys(rows[0]);
+  const find=ps=>keys.find(k=>ps.some(p=>k.toLowerCase().includes(p.toLowerCase())))||null;
+  const col={
+    alliance:find(['alliance','альянс']), name:find(['name','никнейм','nick']),
+    tier:find(['tier','уровень войск']), type:find(['type','тип войск']),
+    troop:find(['troop size','размер отряда']), rally:find(['rally','групповой']),
+    captain:find(['captain','командир','turret']), avail:find(['participation','время участия','time of participation']),
+    notes:find(['additional','дополнительные','concerns'])
+  };
+  return rows.filter(r=>col.name&&r[col.name]).map(r=>{
+    const rawType=String(r[col.type]||'').toLowerCase();
+    const type=rawType.includes('fight')||rawType.includes('боец')?'Fighter':rawType.includes('shoot')||rawType.includes('стрелок')?'Shooter':'Rider';
+    const rawA=String(r[col.avail]||'').toLowerCase();
+    const avail=rawA.includes('all')||rawA.includes('весь')?'All Day':rawA.includes('10:')?'1st':'2nd';
+    const rawC=String(r[col.captain]||'').toLowerCase();
+    const captain=rawC.includes('yes')||rawC.includes('да')?'yes':'no';
+    const pn=v=>parseInt(String(v||0).replace(/[^0-9]/g,''))||0;
+    const tierRaw=String(r[col.tier]||'T10').trim();
+    const tier=/^T\d+$/i.test(tierRaw)?tierRaw.toUpperCase():'T'+(tierRaw.replace(/\D/g,'')||'10');
+    return {id:uid(), alliance:String(r[col.alliance]||'').toUpperCase().trim(), name:String(r[col.name]||'').trim(),
+      tier, type, troopSize:pn(r[col.troop]), rallySize:pn(r[col.rally]), captain, avail, notes:String(r[col.notes]||'').trim()};
+  }).filter(p=>p.name);
+}
+function confirmImport(){
+  if(!impData) return;
+  const existing=new Set(players.map(p=>p.name.toLowerCase()));
+  const newP=impData.filter(p=>!existing.has(p.name.toLowerCase()));
+  const dupes=impData.length-newP.length;
+  // Stash willing flag on each player before impData is cleared by closeImport
+  const toAdd=newP.map(p=>({...p, _capWilling: p.captain==='yes', captain:'no'}));
+  closeImport(); // clears impData — all needed info is now on toAdd
+  openCaptainAssign(toAdd, dupes);
+}
+// ═══════════════════════════════════════════════════════
+// SCHEDULE RENDER
+// ═══════════════════════════════════════════════════════
+function renderAll(){ renderSchedule(); renderRoster(); }
+function renderSchedule(){
+  const area=document.getElementById('schedArea');
+  if(!positions.length){
+    area.innerHTML=`<div class="est"><h3>No Positions Configured</h3><p>Click <strong>⚙ Positions</strong> to set up the 5 positions.<br>Import your roster first so the app can show you the breakdown.</p></div>`;
+    return;
+  }
+  area.innerHTML=positions.map(pos=>renderPos(pos)).join('')+
+    `<button class="addpb" onclick="openPosSetup()">⚙ Re-configure Positions</button>`;
+}
+function renderPos(pos){
+  const nc=typeKey(pos.type);
+  const adT=pos.allDay.reduce((s,a)=>s+(a.troops||0),0);
+  const s1T=pos.shift1.reduce((s,a)=>s+(a.troops||0),0);
+  const s2T=pos.shift2.reduce((s,a)=>s+(a.troops||0),0);
+  return `<div class="pc">
+    <div class="pch">
+      <div class="pn ${nc}">${esc(pos.name)}</div>
+      <span class="tag tg${nc}" style="font-size:11px">${pos.type}s</span>
+      <div class="psum">AD:${fmtN(adT)} · 1st:${fmtN(s1T)}${pos.rally1?'/'+fmtN(pos.rally1):''} · 2nd:${fmtN(s2T)}${pos.rally2?'/'+fmtN(pos.rally2):''}</div>
+      <button class="btn btn-ghost btn-xs" onclick="openEditPos('${pos.id}')">⚙ Edit</button>
+    </div>
+    <div class="shifts">
+      ${renderShift(pos,'allDay','All Day',pos.capAD,0)}
+      ${renderShift(pos,'shift1','1st · 10:00–14:00',pos.cap1,pos.rally1)}
+      ${renderShift(pos,'shift2','2nd · 14:00–18:00',pos.cap2,pos.rally2)}
+    </div>
+  </div>`;
+}
+function renderShift(pos,sh,label,captain,rally){
+  const arr=getArr(pos,sh);
+  const ownTotal=arr.reduce((s,a)=>s+(a.troops||0),0);
+  const adTotal=pos.allDay.reduce((s,a)=>s+(a.troops||0),0);
+  // Shifts include allDay troops since those players cover the full day
+  const total=sh==='allDay'?ownTotal:ownTotal+adTotal;
+  const pct=rally>0?Math.min(100,Math.round(total/rally*100)):0;
+  const cntCls=rally>0?(total>rally?'cover':total>=rally*.88?'cok':'cund'):'';
+  const barCls=total>rally?'rbov':total>=rally*.88?'rbok':'rbun';
+  const rows=arr.map(a=>{
+    const p=players.find(pl=>pl.id===a.pid); if(!p) return '';
+    return `<div class="ap">
+      <span class="apal">${esc(p.alliance)}</span>
+      <span class="apn" title="${esc(p.name)}">${esc(p.name)}</span>
+      <span class="apti">${p.tier}</span>
+      <span class="apt" contenteditable="true"
+        onblur="updTroops('${pos.id}','${sh}','${p.id}',this.textContent)"
+        title="Max: ${fmtN(p.troopSize)}">${fmtN(a.troops)}</span>
+      <button class="aprm" onclick="rmAsgn('${pos.id}','${sh}','${p.id}')">×</button>
+    </div>`;
+  }).join('');
+  return `<div class="shift">
+    <div class="shd2">
+      <span class="slbl">${label}</span>
+      <div style="display:flex;align-items:center;gap:5px">
+        <span class="scnt ${cntCls}" id="cnt-${pos.id}-${sh}">${fmtN(total)}${rally>0?' / '+fmtN(rally):''}</span>
+        <button title="Bulk-edit troops by tier" onclick="openBulkEdit('${pos.id}','${sh}')"
+          style="background:none;border:none;cursor:pointer;color:var(--txt-d);font-size:13px;padding:0 2px;line-height:1;transition:color .12s"
+          onmouseover="this.style.color='var(--acc)'" onmouseout="this.style.color='var(--txt-d)'">⊞</button>
+      </div>
+    </div>
+    <div class="caps">
+      <div class="capr">
+        <span class="capl">CAPT</span>
+        <input class="capi" value="${esc(captain)}" placeholder="Captain name…" onchange="updCap('${pos.id}','${sh}',this.value)">
+      </div>
+      ${sh!=='allDay'?`<input class="rally-inp" type="number" value="${rally||''}" placeholder="Rally cap…" onchange="updRally('${pos.id}','${sh}',this.value)">` : ''}
+    </div>
+    <div class="dz" id="dz-${pos.id}-${sh}"
+      ondragover="dOver(event,'${pos.id}','${sh}')"
+      ondragleave="dLeave('${pos.id}','${sh}')"
+      ondrop="dDrop(event,'${pos.id}','${sh}')">
+      ${!rows?'<div class="dze">Drop players here</div>':rows}
+    </div>
+    ${rally>0?`<div class="rb"><div class="rbf ${barCls}" id="bar-${pos.id}-${sh}" style="width:${pct}%"></div></div>`:''}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════════
+function switchTab(t){
+  outTab=t;
+  document.getElementById('t-disc').className='tab'+(t==='disc'?' on':'');
+  document.getElementById('t-doc').className='tab'+(t==='doc'?' on':'');
+  document.getElementById('p-disc').style.display=t==='disc'?'block':'none';
+  document.getElementById('p-doc').style.display=t==='doc'?'block':'none';
+}
+function openOutput(){ buildOutputs(); document.getElementById('mOut').style.display='flex'; }
+function closeOut(){ document.getElementById('mOut').style.display='none'; }
+
+function buildOutputs(){
+  const ev=document.getElementById('eventName').value||'WK Schedule';
+  const pm={};  players.forEach(p=>pm[p.id]=p);
+
+  // ── DISCORD ──
+  let disc=`📅 **${ev}**\n_(This post will be updated if anything changes.)_\n\n`;
+  for(const pos of positions){
+    const nc=typeKey(pos.type);
+    const divider='━'.repeat(8);
+    disc+=`${divider} **${pos.name.toUpperCase()}** _(${pos.type}s)_ ${divider}\n`;
+    if(pos.capAD) disc+=`🎖️ **Captain (All Day):** ${pos.capAD}   Rally Size: ${fmtFull(pos.rally1)||'—'}\n`;
+    const renderSec=(title, arr, cap, rally)=>{
+      if(!arr.length&&!cap) return;
+      disc+=`\n**${title}**`;
+      if(cap&&!pos.capAD) disc+=`  ·  Captain: **${cap}**`;
+      if(rally) disc+=`  ·  Rally: ${fmtFull(rally)}`;
+      disc+='\n';
+      arr.forEach(a=>{ const p=pm[a.pid]; if(!p) return; disc+=`\`${(p.alliance||'').padEnd(5)}\`  ${p.name.padEnd(22)}  ${p.tier}  ${fmtFull(a.troops)}\n`; });
+    };
+    if(pos.allDay.length) renderSec('🌐 All Day', pos.allDay, pos.capAD, 0);
+    renderSec('⏰ 1st Shift (10:00–14:00)', pos.shift1, pos.cap1, pos.rally1);
+    renderSec('⏰ 2nd Shift (14:00–18:00)', pos.shift2, pos.cap2, pos.rally2);
+    disc+='\n';
+  }
+  document.getElementById('outDisc').textContent=disc;
+
+  // ── DOC FORMAT ──
+  let doc=`${ev}\n${'─'.repeat(Math.max(ev.length,20))}\n\n(This document will be updated if anything changes.)\n\n`;
+  for(const pos of positions){
+    doc+=`# ${pos.name} (${pos.type}s)\n\n`;
+    if(pos.capAD){ doc+=`CAPTAIN: ${pos.capAD} (Full) (All Day)\n`; }
+    if(pos.cap1&&pos.rally1){ doc+=`CAPTAIN: ${pos.cap1} (Full) (1st Shift)   Rally Size: ${fmtFull(pos.rally1)}\n`; }
+    else if(pos.cap1){ doc+=`CAPTAIN: ${pos.cap1} (Full) (1st Shift)\n`; }
+    if(pos.cap2&&pos.rally2){ doc+=`CAPTAIN: ${pos.cap2} (Full) (2nd Shift)   Rally Size: ${fmtFull(pos.rally2)}\n`; }
+    else if(pos.cap2){ doc+=`CAPTAIN: ${pos.cap2} (Full) (2nd Shift)\n`; }
+    doc+='\n';
+    const sec=(lbl,arr)=>{ if(!arr.length) return; doc+=`${lbl}\n`; arr.forEach(a=>{ const p=pm[a.pid]; if(!p) return; doc+=`${(p.alliance||'').padEnd(6)} ${p.name.padEnd(24)} ${p.tier}    ${fmtFull(a.troops)}\n`; }); doc+='\n'; };
+    sec('All Day', pos.allDay);
+    sec('1st (10:00-14:00)', pos.shift1);
+    sec('2nd (14:00-18:00)', pos.shift2);
+    doc+='\n';
+  }
+  document.getElementById('outDoc').textContent=doc;
+}
+
+function copyOut(){
+  const text=document.getElementById('outDisc').textContent;
+  navigator.clipboard.writeText(text).then(()=>notify('📋 Copied to clipboard!')).catch(()=>notify('Select text and copy manually'));
+}
+function dlTxt(){
+  const text=document.getElementById('outDoc').textContent;
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([text],{type:'text/plain'}));
+  a.download=(document.getElementById('eventName').value||'WK_Schedule').replace(/[^a-zA-Z0-9_\- ]/g,'_')+'.txt';
+  a.click();
+}
+
+// ── DOCX BUILDER (client-side OOXML) ──
+function dlDocx(){
+  const ev=document.getElementById('eventName').value||'WK Schedule';
+  const pm={}; players.forEach(p=>pm[p.id]=p);
+  const x=(s)=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const run=(text,opts={})=>{
+    const rpr=[opts.b?'<w:b/>':'', opts.i?'<w:i/>':'', opts.sz?`<w:sz w:val="${opts.sz}"/><w:szCs w:val="${opts.sz}"/>`:'' ,opts.color?`<w:color w:val="${opts.color}"/>`:'' ,opts.font?`<w:rFonts w:ascii="${opts.font}" w:hAnsi="${opts.font}"/>`:'' ].join('');
+    const safe=x(text); const sp=(safe.startsWith(' ')||safe.endsWith(' '))?` xml:space="preserve"`:'';
+    return `<w:r>${rpr?`<w:rPr>${rpr}</w:rPr>`:''}<w:t${sp}>${safe}</w:t></w:r>`;
+  };
+  const para=(children,opts={})=>{
+    const ppr=[opts.before||opts.after?`<w:spacing${opts.before?` w:before="${opts.before}"`:''}${opts.after?` w:after="${opts.after}"`:''}/>`:'' ,opts.indent?`<w:ind w:left="${opts.indent}"/>`:'' ].join('');
+    return `<w:p>${ppr?`<w:pPr>${ppr}</w:pPr>`:''  }${children}</w:p>`;
+  };
+  const paras=[];
+  paras.push(para(run(ev,{b:true,sz:36,font:'Arial'}),{after:120}));
+  paras.push(para(run('(This document will be updated if anything changes.)',{i:true,sz:20,color:'777777'}),{after:320}));
+  for(const pos of positions){
+    const c=pos.type==='Rider'?'C07800':pos.type==='Fighter'?'B02040':'106898';
+    paras.push(para(run(`${pos.name} (${pos.type}s)`,{b:true,sz:28,color:c,font:'Arial'}),{before:260,after:60}));
+    if(pos.capAD) paras.push(para(run('CAPTAIN: ',{b:true,sz:22})+run(pos.capAD+' (Full) (All Day)',{b:true,sz:22,color:'A06000'}),{after:40}));
+    if(pos.cap1)  paras.push(para(run('CAPTAIN: ',{b:true,sz:22})+run(pos.cap1+' (Full) (1st Shift)',{b:true,sz:22,color:'A06000'})+run(pos.rally1?`   Rally Size: ${fmtFull(pos.rally1)}`:'',{b:true,sz:22}),{after:40}));
+    if(pos.cap2)  paras.push(para(run('CAPTAIN: ',{b:true,sz:22})+run(pos.cap2+' (Full) (2nd Shift)',{b:true,sz:22,color:'A06000'})+run(pos.rally2?`   Rally Size: ${fmtFull(pos.rally2)}`:'',{b:true,sz:22}),{after:80}));
+    const sec=(lbl,arr)=>{
+      if(!arr.length) return;
+      paras.push(para(run(lbl,{b:true,sz:22,color:'555555',font:'Arial'}),{before:140,after:40}));
+      arr.forEach(a=>{
+        const p=pm[a.pid]; if(!p) return;
+        paras.push(para(
+          run((p.alliance||'').padEnd(6),{sz:20,color:'888888',font:'Courier New'})+
+          run('  ',{sz:20})+run(p.name.padEnd(26),{sz:20,font:'Courier New'})+
+          run('  ',{sz:20})+run(p.tier.padEnd(5),{sz:20,color:'996600',font:'Courier New'})+
+          run(fmtFull(a.troops),{sz:20,font:'Courier New'}),
+          {indent:360,after:20}
+        ));
+      });
+    };
+    sec('All Day',pos.allDay); sec('1st (10:00-14:00)',pos.shift1); sec('2nd (14:00-18:00)',pos.shift2);
+    paras.push(para('',{after:200}));
+  }
+  const docXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${paras.join('')}<w:sectPr><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="1080" w:right="1080" w:bottom="1080" w:left="1080"/></w:sectPr></w:body></w:document>`;
+  const files={
+    'word/document.xml':docXml,
+    'word/_rels/document.xml.rels':`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`,
+    'word/styles.xml':`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Courier New" w:hAnsi="Courier New"/><w:sz w:val="20"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>`,
+    '_rels/.rels':`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`,
+    '[Content_Types].xml':`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>`
+  };
+  buildZip(files).then(blob=>{
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=ev.replace(/[^a-zA-Z0-9_\- ]/g,'_')+'.docx';
+    a.click(); notify('Downloading .docx…');
+  });
+}
+
+async function buildZip(files){
+  const enc=new TextEncoder(), parts=[], offsets={};
+  let offset=0;
+  for(const[name,content]of Object.entries(files)){
+    const nb=enc.encode(name), db=enc.encode(content), crc=crc32(db);
+    const h=new Uint8Array(30+nb.length), dv=new DataView(h.buffer);
+    dv.setUint32(0,0x04034b50,true); dv.setUint16(4,20,true); dv.setUint16(6,0,true); dv.setUint16(8,0,true);
+    dv.setUint16(10,0,true); dv.setUint16(12,0,true); dv.setUint32(14,crc,true);
+    dv.setUint32(18,db.length,true); dv.setUint32(22,db.length,true); dv.setUint16(26,nb.length,true); dv.setUint16(28,0,true);
+    h.set(nb,30); offsets[name]=offset; offset+=h.length+db.length; parts.push(h,db);
+  }
+  const cds=[];
+  for(const[name,content]of Object.entries(files)){
+    const nb=enc.encode(name), db=enc.encode(content), crc=crc32(db);
+    const cd=new Uint8Array(46+nb.length), dv=new DataView(cd.buffer);
+    dv.setUint32(0,0x02014b50,true); dv.setUint16(4,20,true); dv.setUint16(6,20,true); dv.setUint16(8,0,true);
+    dv.setUint16(10,0,true); dv.setUint16(12,0,true); dv.setUint16(14,0,true); dv.setUint32(16,crc,true);
+    dv.setUint32(20,db.length,true); dv.setUint32(24,db.length,true); dv.setUint16(28,nb.length,true);
+    dv.setUint16(30,0,true); dv.setUint16(32,0,true); dv.setUint16(34,0,true); dv.setUint16(36,0,true);
+    dv.setUint32(38,0,true); dv.setUint32(42,offsets[name],true); cd.set(nb,46); cds.push(cd);
+  }
+  const cdSize=cds.reduce((s,c)=>s+c.length,0);
+  const eocd=new Uint8Array(22), dv2=new DataView(eocd.buffer);
+  dv2.setUint32(0,0x06054b50,true); dv2.setUint16(4,0,true); dv2.setUint16(6,0,true);
+  dv2.setUint16(8,Object.keys(files).length,true); dv2.setUint16(10,Object.keys(files).length,true);
+  dv2.setUint32(12,cdSize,true); dv2.setUint32(16,offset,true); dv2.setUint16(20,0,true);
+  const all=[...parts,...cds,eocd], total=all.reduce((s,a)=>s+a.length,0), buf=new Uint8Array(total);
+  let pos=0; for(const a of all){ buf.set(a,pos); pos+=a.length; }
+  return new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+}
+function crc32(data){
+  const t=new Uint32Array(256);
+  for(let i=0;i<256;i++){let c=i;for(let j=0;j<8;j++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1);t[i]=c;}
+  let c=0xFFFFFFFF; for(const b of data) c=t[(c^b)&0xFF]^(c>>>8); return(c^0xFFFFFFFF)>>>0;
+}
+
+// ═══════════════════════════════════════════════════════
+// MISC
+// ═══════════════════════════════════════════════════════
+function clearRoster(){
+  if(!confirm('Clear all players? All assignments will be removed.')) return;
+  players=[]; positions.forEach(p=>{p.allDay=[];p.shift1=[];p.shift2=[];});
+  renderAll();
+}
+function notify(msg){
+  const el=document.createElement('div'); el.className='notif'; el.textContent=msg;
+  document.body.appendChild(el); setTimeout(()=>el.remove(),2600);
+}
+
+// ═══════════════════════════════════════════════════════
+// CAPTAIN ASSIGNMENT (post-import dialog)
+// ═══════════════════════════════════════════════════════
+let capAssignPlayers = [];   // the full batch being imported
+let capAssignDupes = 0;
+// capAssignments[playerId] = {checked:bool, posId:string, shift:string}
+
+function openCaptainAssign(toAdd, dupes){
+  capAssignPlayers = toAdd;
+  capAssignDupes = dupes;
+
+  // _capWilling was stashed on each player before impData was cleared
+  window.capAssignments = {};
+  toAdd.forEach(p => {
+    window.capAssignments[p.id] = { checked: false, posId:'', shift:'' };
+  });
+
+  renderCaptainAssign();
+  document.getElementById('mCaptain').style.display='flex';
+}
+
+function renderCaptainAssign(){
+  const willing = capAssignPlayers.filter(p => p._capWilling);
+  const total = capAssignPlayers.length || 1;
+
+  // Build per-type stats from the full imported batch
+  const typeStats = ['Rider','Fighter','Shooter'].map(type => {
+    const group = capAssignPlayers.filter(p => p.type === type);
+    const count = group.length;
+    const avgTier = count ? group.reduce((s,p) => s + tierNum(p.tier), 0) / count : 0;
+    return { type, count, avgTier };
+  });
+  const strongest = [...typeStats].sort((a,b) => b.avgTier - a.avgTier)[0].type;
+
+  const statBar = typeStats.map(s => {
+    const pct = Math.round(s.count / total * 100);
+    const col = s.type==='Rider'?'var(--rdr)':s.type==='Fighter'?'var(--fgt)':'var(--sht)';
+    const isStrongest = s.type === strongest;
+    return `<div style="display:flex;align-items:center;gap:8px">
+      <span style="color:${col};font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;letter-spacing:.5px;text-transform:uppercase;min-width:62px">${s.type}s</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--txt);min-width:28px">${s.count}</span>
+      <span style="font-size:11px;color:var(--txt-d);min-width:34px">${pct}%</span>
+      <span style="font-size:11px;color:var(--txt-d)">avg T${s.avgTier.toFixed(1)}</span>
+      ${isStrongest ? `<span style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10px;letter-spacing:.5px;text-transform:uppercase;padding:1px 6px;border-radius:2px;background:var(--acc-d);color:var(--acc);border:1px solid rgba(232,160,32,.4)">STRONGEST</span>` : ''}
+    </div>`;
+  }).join('');
+
+  // Inject stat bar into the modal info box
+  const infoEl = document.getElementById('capDialogStats');
+  if (infoEl) infoEl.innerHTML = statBar;
+
+  // Always use the fixed 5 position names — match to configured positions if available,
+  // otherwise just store the name string so it can be applied after setup
+  const fixedNames = ['Hub','North','South','East','West'];
+  const posOpts = fixedNames.map(name => {
+    const matched = positions.find(p => p.name === name);
+    const val = matched ? matched.id : `__name__${name}`;
+    return `<option value="${val}">${name}${matched?' ('+matched.type+'s)':''}</option>`;
+  }).join('');
+
+  const shiftOpts = `
+    <option value="">— shift —</option>
+    <option value="allDay">All Day</option>
+    <option value="shift1">1st (10:00–14:00)</option>
+    <option value="shift2">2nd (14:00–18:00)</option>`;
+
+  if(!willing.length){
+    document.getElementById('capList').innerHTML=`<div class="no-caps">No players indicated they were willing to be captain.<br>You can assign captains manually using the shift fields on each position.</div>`;
+    return;
+  }
+
+  document.getElementById('capList').innerHTML = willing.map(p=>{
+    const state = window.capAssignments[p.id] || {checked:false};
+    const avL = p.avail==='All Day'?'All Day':p.avail==='1st'?'10:00–14:00':'14:00–18:00';
+    return `<div class="cap-candidate ${state.checked?'selected':''}" id="caprow-${p.id}">
+      <input type="checkbox" class="cap-check" ${state.checked?'checked':''}
+        onchange="toggleCapCheck('${p.id}',this.checked)">
+      <div class="cap-info">
+        <div class="cap-name">
+          <span class="tag tgal" style="margin-right:4px">${esc(p.alliance)}</span>
+          ${esc(p.name)}
+          <span class="tag tg${typeKey(p.type)}" style="margin-left:4px">${p.type}</span>
+          <span class="tag tgti" style="margin-left:2px">${p.tier}</span>
+        </div>
+        <div class="cap-meta">
+          <span class="cap-rally">Rally: ${fmtFull(p.rallySize)}</span>
+          <span style="font-size:10px;color:var(--txt-d)">Troops: ${fmtFull(p.troopSize)}</span>
+          <span style="font-size:10px;color:var(--txt-d)">⏱ ${avL}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCapCheck(pid, checked){
+  if(!window.capAssignments[pid]) window.capAssignments[pid]={checked:false,posId:'',shift:''};
+  window.capAssignments[pid].checked = checked;
+  const row = document.getElementById(`caprow-${pid}`);
+  if(row) row.className = 'cap-candidate' + (checked?' selected':'');
+}
+
+function setCapAssign(pid, key, val){
+  if(!window.capAssignments[pid]) window.capAssignments[pid]={checked:false,posId:'',shift:''};
+  window.capAssignments[pid][key] = val;
+}
+
+function finalizeCaptains(){
+  // 1. Mark confirmed captains (those that were checked)
+  capAssignPlayers.forEach(p=>{
+    const state = window.capAssignments[p.id];
+    p.captain = (state && state.checked) ? 'yes' : 'no';
+  });
+
+  // 2. Stash confirmed captains for position setup to use
+  // confirmedCaptains: array of player objects who are confirmed captains
+  window.confirmedCaptains = capAssignPlayers.filter(p => p.captain === 'yes');
+
+  // 3. Add all players to roster
+  players.push(...capAssignPlayers);
+
+  document.getElementById('mCaptain').style.display='none';
+  capAssignPlayers = [];
+  window.capAssignments = {};
+  renderAll();
+
+  notify('Players imported — set up positions and assign captains…');
+  setTimeout(()=>openPosSetup(), 350);
+}
+
+// ═══════════════════════════════════════════════════════
+// BULK EDIT TROOPS BY TIER
+// ═══════════════════════════════════════════════════════
+let bulkEditPosId = null;
+let bulkEditShift = null;
+
+function openBulkEdit(posId, sh){
+  bulkEditPosId = posId;
+  bulkEditShift = sh;
+  const pos = positions.find(p=>p.id===posId);
+  if(!pos) return;
+  const arr = getArr(pos, sh);
+  const label = sh==='allDay'?'All Day':sh==='shift1'?'1st Shift (10:00–14:00)':'2nd Shift (14:00–18:00)';
+
+  // Show which tiers are present in this shift
+  const tierCounts = {};
+  arr.forEach(a=>{
+    const p = players.find(pl=>pl.id===a.pid); if(!p) return;
+    tierCounts[p.tier] = (tierCounts[p.tier]||0) + 1;
+  });
+  const tierSummary = Object.entries(tierCounts).sort((a,b)=>tierNum(b[0])-tierNum(a[0]))
+    .map(([t,c])=>`<span class="tag tgti" style="margin-right:2px">${t}</span>${c}p`).join(' · ');
+
+  document.getElementById('bulkEditInfo').innerHTML =
+    `<strong>${esc(pos.name)}</strong> — ${label}<br>
+     <span style="font-size:11px;color:var(--txt-d);margin-top:4px;display:block">
+       ${arr.length} player${arr.length!==1?'s':''} assigned${tierSummary?' · '+tierSummary:''}
+     </span>`;
+
+  document.getElementById('bulkTier').value = 'all';
+  document.getElementById('bulkAmount').value = '';
+  document.getElementById('mBulkEdit').style.display = 'flex';
+  setTimeout(()=>document.getElementById('bulkAmount').focus(), 100);
+}
+
+function closeBulkEdit(){
+  document.getElementById('mBulkEdit').style.display = 'none';
+  bulkEditPosId = null; bulkEditShift = null;
+}
+
+function applyBulkEdit(){
+  const pos = positions.find(p=>p.id===bulkEditPosId); if(!pos) return;
+  const arr = getArr(pos, bulkEditShift);
+  const tier = document.getElementById('bulkTier').value;
+  const amount = parseInt(document.getElementById('bulkAmount').value);
+  if(!amount || amount < 0) return notify('Enter a valid troop amount');
+
+  let updated = 0;
+  arr.forEach(a=>{
+    const p = players.find(pl=>pl.id===a.pid); if(!p) return;
+    if(tier !== 'all' && p.tier !== tier) return;
+    a.troops = Math.min(amount, p.troopSize);
+    updated++;
+  });
+
+  closeBulkEdit();
+  renderAll();
+  notify(`Updated ${updated} player${updated!==1?'s':''} in ${bulkEditShift==='allDay'?'All Day':bulkEditShift==='shift1'?'1st Shift':'2nd Shift'}`);
+}
+
+renderAll();
+</script>
+</body>
+</html>
