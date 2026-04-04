@@ -305,9 +305,42 @@ select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t
 .m-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:22px; }
 .m-err { font-family:var(--ff-l); font-size:12px; color:var(--red); margin-top:8px; min-height:16px; }
 
-/* ai import modal */
-.ai-paste-area {
+/* ai import tabs + drop zone */
+.import-tab {
+  font-family:var(--ff-l); font-size:12px; font-weight:600; letter-spacing:.5px; text-transform:uppercase;
+  padding:9px 16px; background:transparent; border:none; border-bottom:2px solid transparent;
+  color:var(--t3); cursor:pointer; display:inline-flex; align-items:center; transition:all .18s;
+  margin-bottom:-1px;
+}
+.import-tab:hover { color:var(--t2); }
+.import-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+.img-drop-zone {
+  border:1px dashed var(--border2); border-radius:var(--r-lg);
+  padding:32px 20px; text-align:center; cursor:pointer;
+  transition:all .2s; background:var(--bg3);
+  display:flex; flex-direction:column; align-items:center;
+}
+.img-drop-zone:hover, .img-drop-zone.drag-over { border-color:rgba(0,217,163,.5); background:var(--accent-dim); }
+.img-thumb {
+  position:relative; width:80px; height:80px; border-radius:var(--r);
+  overflow:hidden; border:1px solid var(--border2); flex-shrink:0;
+}
+.img-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+.img-thumb-del {
+  position:absolute; top:3px; right:3px;
+  width:18px; height:18px; border-radius:50%;
+  background:rgba(0,0,0,.75); color:#fff; border:none; cursor:pointer;
+  font-size:14px; line-height:1; display:flex; align-items:center; justify-content:center;
+}
+
   width:100%; min-height:140px; padding:12px;
+  background:var(--bg3); border:1px solid var(--border);
+  border-radius:var(--r); color:var(--t1);
+  font-family:var(--ff-b); font-size:13px; line-height:1.6;
+  resize:vertical; outline:none; transition:border-color .2s;
+}
+.ai-paste-area {
+  width:100%; min-height:160px; padding:12px;
   background:var(--bg3); border:1px solid var(--border);
   border-radius:var(--r); color:var(--t1);
   font-family:var(--ff-b); font-size:13px; line-height:1.6;
@@ -576,39 +609,67 @@ select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t
 
 <!-- AI IMPORT MODAL -->
 <div class="m-overlay" id="importModal">
-  <div class="modal" style="max-width:580px">
-    <div class="m-title">
-      <span>AI State Import</span>
-      <button class="m-close" onclick="closeImportModal()">&times;</button>
-    </div>
-    <p style="font-size:13px;color:var(--t2);margin-bottom:16px;line-height:1.6">Paste any scouting text — a Reddit post, Discord message, notes, screenshot transcript — and AI will extract state data and pre-fill the fields for you to review before importing.</p>
+  <div class="modal" style="max-width:600px;max-height:92vh;display:flex;flex-direction:column;padding:0;overflow:hidden">
 
-    <div class="ff" style="margin-bottom:14px">
-      <label>Anthropic API key <span style="color:var(--t3);font-weight:400;letter-spacing:0">(stored locally, never sent anywhere except Anthropic)</span></label>
-      <div class="api-key-wrap">
-        <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off" oninput="saveApiKey()" />
-        <button class="btn btn-ghost btn-sm" onclick="toggleKeyVis()" id="btnKeyVis">Show</button>
+    <!-- fixed header: title + api key + tabs -->
+    <div style="padding:20px 22px 0;flex-shrink:0">
+      <div class="m-title" style="margin-bottom:12px">
+        <span>AI State Import</span>
+        <button class="m-close" onclick="closeImportModal()">&times;</button>
+      </div>
+      <div style="display:flex;border-bottom:1px solid var(--border)">
+        <button class="import-tab active" id="tabImg" onclick="switchTab('img')">
+          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;margin-right:6px"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Screenshots
+        </button>
+        <button class="import-tab" id="tabTxt" onclick="switchTab('txt')">
+          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;margin-right:6px"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+          Paste text
+        </button>
       </div>
     </div>
 
-    <div class="ff" style="margin-bottom:14px">
-      <label>Paste scouting text</label>
-      <textarea class="ai-paste-area" id="importText" placeholder="e.g. 'State 1107 — top alliance [WAR] is sitting at 920M power, server opened about 3 weeks ago, heavy war zone in the north, migration costs 45k gems and requires 30 days old...'"></textarea>
+    <!-- scrollable body -->
+    <div style="flex:1;overflow-y:auto;padding:16px 22px">
+      <!-- screenshots panel -->
+      <div id="panelImg">
+        <div id="imgDropZone" class="img-drop-zone"
+          onclick="document.getElementById('imgFileInput').click()"
+          ondragover="event.preventDefault();this.classList.add('drag-over')"
+          ondragleave="this.classList.remove('drag-over')"
+          ondrop="handleDrop(event)">
+          <svg viewBox="0 0 24 24" style="width:32px;height:32px;stroke:var(--t3);fill:none;stroke-width:1.5;margin-bottom:10px"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <div style="font-family:var(--ff-l);font-size:14px;color:var(--t2)">Drop screenshots here or <span style="color:var(--accent);cursor:pointer">click to browse</span></div>
+          <div style="font-size:12px;color:var(--t3);margin-top:6px">PNG, JPG · multiple files supported · drag multiple pages at once</div>
+        </div>
+        <input type="file" id="imgFileInput" accept="image/*" multiple style="display:none" onchange="handleFileSelect(event)" />
+        <div id="imgPreviews" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"></div>
+      </div>
+
+      <!-- text panel -->
+      <div id="panelTxt" style="display:none">
+        <textarea id="importText"
+          style="width:100%;min-height:160px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--t1);font-family:var(--ff-b);font-size:13px;line-height:1.6;resize:vertical;outline:none;box-sizing:border-box;display:block"
+          placeholder="Paste scouting info — Discord messages, Reddit posts, notes...&#10;&#10;e.g. 'State 1107 — top alliance [WAR] sitting at 920M power, opened ~3 weeks ago, heavy war zone north, migration 45k gems, requires day 30+...'"
+          onfocus="this.style.borderColor='rgba(0,217,163,.4)'"
+          onblur="this.style.borderColor='var(--border)'"></textarea>
+      </div>
+
+      <button class="btn btn-primary" style="width:100%;justify-content:center;margin:14px 0" onclick="runImport()" id="btnRunImport">
+        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="m9 12 2 2 4-4"/></svg>
+        Extract with AI
+      </button>
+
+      <div class="ai-status" id="aiStatus">
+        <div class="ai-spinner"></div>
+        <span id="aiStatusText">Analysing screenshots...</span>
+      </div>
+
+      <div id="importResults"></div>
     </div>
 
-    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:16px" onclick="runImport()" id="btnRunImport">
-      <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="m9 12 2 2 4-4"/></svg>
-      Extract with AI
-    </button>
-
-    <div class="ai-status" id="aiStatus">
-      <div class="ai-spinner"></div>
-      <span id="aiStatusText">Analysing text...</span>
-    </div>
-
-    <div id="importResults"></div>
-
-    <div class="m-actions" id="importActions" style="display:none">
+    <!-- fixed footer -->
+    <div class="m-actions" id="importActions" style="display:none;padding:14px 22px;border-top:1px solid var(--border);flex-shrink:0">
       <button class="btn btn-ghost" onclick="closeImportModal()">Cancel</button>
       <button class="btn btn-primary" onclick="confirmImport()">Import selected states</button>
     </div>
@@ -617,7 +678,6 @@ select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t
 
 <script>
 const SK = 'pns_scout_v2';
-const SK_KEY = 'pns_api_key';
 let states = [];
 let activeId = null;
 let editingId = null;
@@ -634,18 +694,9 @@ function load() {
   } else {
     showApp();
   }
-  // restore api key
-  const k = localStorage.getItem(SK_KEY);
-  if (k) document.getElementById('apiKeyInput').value = k;
+  // restore api key — not needed in server version
 }
 function save() { try { localStorage.setItem(SK, JSON.stringify(states)); } catch(e) {} }
-function saveApiKey() { try { localStorage.setItem(SK_KEY, document.getElementById('apiKeyInput').value.trim()); } catch(e) {} }
-function toggleKeyVis() {
-  const inp = document.getElementById('apiKeyInput');
-  const btn = document.getElementById('btnKeyVis');
-  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = 'Hide'; }
-  else { inp.type = 'password'; btn.textContent = 'Show'; }
-}
 function mkId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
 /* ── AGE ESTIMATION ──
@@ -908,62 +959,107 @@ function openImportModal() {
   document.getElementById('importResults').innerHTML='';
   document.getElementById('importActions').style.display='none';
   document.getElementById('aiStatus').className='ai-status';
+  document.getElementById('imgPreviews').innerHTML='';
+  document.getElementById('importText').value='';
   importedResults=[];
+  uploadedImages=[];
+  switchTab('img');
 }
 function closeImportModal() { document.getElementById('importModal').classList.remove('open'); }
 
+function switchTab(tab) {
+  document.getElementById('tabImg').classList.toggle('active', tab==='img');
+  document.getElementById('tabTxt').classList.toggle('active', tab==='txt');
+  document.getElementById('panelImg').style.display = tab==='img' ? 'block' : 'none';
+  document.getElementById('panelTxt').style.display = tab==='txt' ? 'block' : 'none';
+}
+
+let uploadedImages = [];
+
+function handleFileSelect(e) { addImages(Array.from(e.target.files)); e.target.value=''; }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('imgDropZone').classList.remove('drag-over');
+  addImages(Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/')));
+}
+function addImages(files) {
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      uploadedImages.push({ id:mkId(), dataUrl:ev.target.result, mediaType:file.type||'image/jpeg', name:file.name });
+      renderThumbs();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+function removeImage(id) {
+  uploadedImages = uploadedImages.filter(x=>x.id!==id);
+  renderThumbs();
+}
+function renderThumbs() {
+  document.getElementById('imgPreviews').innerHTML = uploadedImages.map(img =>
+    `<div class="img-thumb">
+      <img src="${img.dataUrl}" alt="${esc(img.name)}" />
+      <button class="img-thumb-del" onclick="removeImage('${img.id}')">×</button>
+    </div>`).join('');
+}
+
 async function runImport() {
-  const apiKey = document.getElementById('apiKeyInput').value.trim();
-  const text   = document.getElementById('importText').value.trim();
-  if (!apiKey) { showAiError('Please enter your Anthropic API key above.'); return; }
-  if (!text)   { showAiError('Please paste some scouting text first.'); return; }
+  const isImgTab = document.getElementById('tabImg').classList.contains('active');
+  const text     = document.getElementById('importText').value.trim();
+
+  if (isImgTab && uploadedImages.length === 0) { showAiError('Please add at least one screenshot.'); return; }
+  if (!isImgTab && !text) { showAiError('Please paste some scouting text first.'); return; }
 
   const status = document.getElementById('aiStatus');
   status.className='ai-status thinking';
-  document.getElementById('aiStatusText').textContent='Analysing text...';
+  document.getElementById('aiStatusText').textContent = isImgTab
+    ? `Analysing ${uploadedImages.length} screenshot${uploadedImages.length>1?'s':''}...`
+    : 'Analysing text...';
   document.getElementById('importResults').innerHTML='';
   document.getElementById('importActions').style.display='none';
   document.getElementById('btnRunImport').disabled=true;
 
-  const systemPrompt = `You are a data extraction assistant for the mobile game Puzzles & Survival. Extract information about game states (servers) from the text provided. Return ONLY valid JSON — no markdown, no explanation, no code fences.
+  const systemPrompt = `You are a data extraction assistant for the mobile game Puzzles & Survival. Extract information about game states (servers) from the content provided — this may be screenshots of the in-game State List, scouting notes, or messages.
 
-Return a JSON array of objects. Each object represents one state and must use these exact keys (use null for unknown values):
+In in-game State List screenshots, states appear as "S:811 Love&Peace69" — the number after S: is the state number, the name follows. "Open" in green means the portal is open. Extract ALL visible states.
+
+Return ONLY valid JSON — no markdown, no explanation, no code fences.
+Return a JSON array of objects:
 {
-  "number": <integer state number, required>,
-  "name": <string nickname or null>,
+  "number": <integer, required>,
+  "name": <string state name or null>,
   "viability": <"viable"|"monitor"|"avoid"|"unknown">,
   "phase": <"early"|"mid"|"late"|null>,
   "age": <integer days old or null>,
   "topAlliance": <string or null>,
-  "topPower": <string power value like "850M" or null>,
-  "nap": <string describing NAP/war status or null>,
-  "migCost": <integer gem cost or null>,
-  "migReq": <string requirements or null>,
-  "notes": <string any other relevant notes or null>
+  "topPower": <string like "850M" or null>,
+  "nap": <string or null>,
+  "migCost": <integer gems or null>,
+  "migReq": <string or null>,
+  "notes": <"Portal open" if Open shown, plus any other info, or null>
 }
-
-Viability inference rules:
-- "viable": explicitly positive, good candidate, recommended
-- "monitor": mixed signals, needs more info, borderline
-- "avoid": explicitly negative, dangerous, not recommended, heavy war zone
-- "unknown": no viability signal found
-
-If no states are found, return an empty array [].`;
+Return [] if no states found.`;
 
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    const userContent = isImgTab
+      ? [
+          ...uploadedImages.map(img => ({
+            type: 'image',
+            source: { type: 'base64', media_type: img.mediaType, data: img.dataUrl.split(',')[1] }
+          })),
+          { type: 'text', text: 'Extract all state data from these screenshots.' }
+        ]
+      : text;
+
+    const resp = await fetch('/api/claude', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
+        max_tokens: 4000,
         system: systemPrompt,
-        messages: [{ role: 'user', content: text }]
+        messages: [{ role: 'user', content: userContent }]
       })
     });
 
@@ -983,7 +1079,7 @@ If no states are found, return an empty array [].`;
     document.getElementById('btnRunImport').disabled=false;
 
     if (!extracted.length) {
-      showAiError('No state data found in that text. Try pasting more detailed scouting info.');
+      showAiError('No state data found. Make sure the screenshot shows the in-game State List.');
       return;
     }
 
