@@ -461,7 +461,6 @@ select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t
         <div class="brand-name">PNS STATE SCOUT</div>
         <div class="brand-sub">Alliance Migration Research</div>
       </div>
-      <div style="font-family:var(--ff-l);font-size:11px;letter-spacing:.5px;transition:color .3s" id="syncStatus"></div>
     </div>
     <div class="header-right">
       <div class="search-wrap" style="min-width:200px">
@@ -476,10 +475,15 @@ select.fsel:focus { outline:none; border-color:rgba(0,217,163,.4); color:var(--t
         <option value="unknown">Unknown</option>
       </select>
 
-      <button class="btn btn-ghost btn-sm" onclick="refreshData()" title="Pull latest data from shared store">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-        Refresh
+      <button class="btn btn-ghost btn-sm" onclick="exportData()" title="Export all states as JSON">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export
       </button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('jsonImportFile').click()" title="Import states from JSON file">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Import
+      </button>
+      <input type="file" id="jsonImportFile" accept=".json" style="display:none" onchange="importData(event)" />
       <button class="btn btn-ghost btn-sm" onclick="openRangeModal()">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add range
@@ -769,58 +773,16 @@ let editingId = null;
 let importedResults = [];
 
 /* storage */
-let saveTimer = null;
-
-async function load() {
-  // Show loading state
-  document.getElementById('initScreen').style.display = 'none';
-  document.getElementById('appScreen').style.display = 'block';
-  showSyncStatus('loading');
-
-  try {
-    const resp = await fetch('/api/data');
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    const data = await resp.json();
-    states = Array.isArray(data.states) ? data.states : [];
-
-    // First run — no states in KV yet
-    if (states.length === 0 && !localStorage.getItem(SK + '_seeded')) {
-      document.getElementById('appScreen').style.display = 'none';
-      document.getElementById('initScreen').style.display = 'flex';
-      showSyncStatus('');
-      return;
-    }
-
+function load() {
+  try { const r = localStorage.getItem(SK); states = r ? JSON.parse(r) : null; }
+  catch(e) { states = null; }
+  if (states === null) {
+    states = [];
+    document.getElementById('initScreen').style.display = 'flex';
+    document.getElementById('appScreen').style.display = 'none';
+  } else {
     backfillAges();
     showApp();
-    showSyncStatus('synced');
-  } catch(e) {
-    // KV unavailable — fall back to localStorage
-    console.warn('KV load failed, using localStorage:', e.message);
-    try { const r = localStorage.getItem(SK); states = r ? JSON.parse(r) : []; } catch(_) { states = []; }
-    if (states.length === 0) {
-      document.getElementById('appScreen').style.display = 'none';
-      document.getElementById('initScreen').style.display = 'flex';
-    } else {
-      backfillAges();
-      showApp();
-    }
-    showSyncStatus('offline');
-  }
-}
-
-async function refreshData() {
-  showSyncStatus('loading');
-  try {
-    const resp = await fetch('/api/data');
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    const data = await resp.json();
-    states = Array.isArray(data.states) ? data.states : [];
-    backfillAges();
-    renderStats(); render();
-    showSyncStatus('synced');
-  } catch(e) {
-    showSyncStatus('offline');
   }
 }
 
@@ -835,42 +797,7 @@ function backfillAges() {
   if (migrated) save();
 }
 
-function save() {
-  // Write to localStorage immediately as a local cache
-  try { localStorage.setItem(SK, JSON.stringify(states)); localStorage.setItem(SK + '_seeded', '1'); } catch(e) {}
-  // Debounce KV writes — batch rapid changes into one request
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(async () => {
-    showSyncStatus('saving');
-    try {
-      const resp = await fetch('/api/data', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ states })
-      });
-      if (!resp.ok) throw new Error('HTTP ' + resp.status);
-      showSyncStatus('synced');
-    } catch(e) {
-      console.warn('KV save failed:', e.message);
-      showSyncStatus('offline');
-    }
-  }, 800);
-}
-
-function showSyncStatus(status) {
-  const el = document.getElementById('syncStatus');
-  if (!el) return;
-  const map = {
-    loading: { text: 'Loading...', color: 'var(--t3)' },
-    saving:  { text: 'Saving...', color: 'var(--amber)' },
-    synced:  { text: '● Synced', color: 'var(--accent)' },
-    offline: { text: '● Offline', color: 'var(--red)' },
-    '':      { text: '', color: '' }
-  };
-  const s = map[status] || map[''];
-  el.textContent = s.text;
-  el.style.color = s.color;
-}
+function save() { try { localStorage.setItem(SK, JSON.stringify(states)); } catch(e) {} }
 
 function mkId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
