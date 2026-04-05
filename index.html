@@ -487,6 +487,145 @@
       text-transform: uppercase;
     }
 
+    /* ── Quick Tools ── */
+    .quick-tools-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .qt-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--border-bright);
+    }
+
+    .qt-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .qt-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #e0e4d4;
+    }
+
+    .qt-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid var(--accent-dim);
+      padding: 2px 8px;
+    }
+
+    .qt-body {
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .qt-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .qt-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .qt-select {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      background: var(--bg-deep);
+      color: var(--accent);
+      border: 1px solid var(--border-bright);
+      padding: 6px 10px;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238ab840'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 28px;
+    }
+    .qt-select:focus { border-color: var(--accent-dim); }
+
+    .qt-output-wrap {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .qt-output {
+      flex: 1;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      color: var(--text-primary);
+      background: var(--bg-deep);
+      border: 1px solid var(--border-bright);
+      padding: 8px 12px;
+      letter-spacing: 0.04em;
+      line-height: 1.5;
+      word-break: break-all;
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+    }
+
+    .qt-copy-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent-dim);
+      padding: 0 14px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .qt-copy-btn:hover { background: var(--accent-glow); }
+    .qt-copy-btn.copied { color: #e0e4d4; border-color: var(--border-bright); }
+
+    .qt-breakdown {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .qt-tz-pill {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 3px 8px;
+      white-space: nowrap;
+    }
+    .qt-tz-pill span { color: var(--text-primary); }
+
     /* ── Animations ── */
     .fade-in {
       opacity: 0;
@@ -558,19 +697,94 @@
     </div>
 
     <div class="fade-in">
-      <p class="hero-byline">Created by: <span>S790 [PAO] BakedOats</span></p>
+      <p class="hero-byline">Created by: <span>S970 [PAO] BakedOats</span></p>
     </div>
 
     <div class="fade-in">
       <p class="hero-desc">
-        Centralized intelligence hub for alliance commanders. Access your tactical tools, track your forces, and dominate the wasteland with precision.
+        Hiii! These are all shit right now, live links are for testing only lol, I'll replace this text with something cooler later
       </p>
     </div>
 
   </section>
 
-  <!-- Divider -->
+  <!-- Quick Tools Divider -->
   <div class="divider fade-in">
+    <div class="divider-line"></div>
+    <div class="divider-diamond"></div>
+    <span class="divider-label">Quick Tools</span>
+    <div class="divider-diamond"></div>
+    <div class="divider-line"></div>
+  </div>
+
+  <!-- Quick Tools Section -->
+  <div class="quick-tools-grid">
+
+    <!-- Timezone Tool -->
+    <div class="qt-card fade-in">
+      <div class="qt-card-header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="9" stroke="#8ab840" stroke-width="1.5"/>
+            <path d="M12 6V12L16 15" stroke="#8ab840" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M3 12H5M19 12H21M12 3V5M12 19V21" stroke="#8ab840" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          <span class="qt-title">Reset Time Converter</span>
+        </div>
+        <span class="qt-tag">Timezone</span>
+      </div>
+      <div class="qt-body">
+        <div class="qt-row">
+          <label class="qt-label" for="tz-offset">Reset offset</label>
+          <select id="tz-offset" class="qt-select" onchange="updateTz()">
+            <option value="-12">RESET -12</option>
+            <option value="-11">RESET -11</option>
+            <option value="-10">RESET -10</option>
+            <option value="-9">RESET -9</option>
+            <option value="-8">RESET -8</option>
+            <option value="-7">RESET -7</option>
+            <option value="-6">RESET -6</option>
+            <option value="-5">RESET -5</option>
+            <option value="-4">RESET -4</option>
+            <option value="-3">RESET -3</option>
+            <option value="-2">RESET -2</option>
+            <option value="-1">RESET -1</option>
+            <option value="0" selected>RESET (UTC 0)</option>
+            <option value="1">RESET +1</option>
+            <option value="2">RESET +2</option>
+            <option value="3">RESET +3</option>
+            <option value="4">RESET +4</option>
+            <option value="5">RESET +5</option>
+            <option value="6">RESET +6</option>
+            <option value="7">RESET +7</option>
+            <option value="8">RESET +8</option>
+            <option value="9">RESET +9</option>
+            <option value="10">RESET +10</option>
+            <option value="11">RESET +11</option>
+            <option value="12">RESET +12</option>
+          </select>
+        </div>
+        <div class="qt-output-wrap">
+          <div class="qt-output" id="tz-output">@ RESET (7pm EST / 6pm CST / 5pm MST / 4pm PST / 12am UK)</div>
+          <button class="qt-copy-btn" id="tz-copy-btn" onclick="copyTzOutput()">Copy</button>
+        </div>
+        <div class="qt-breakdown" id="tz-breakdown"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Deployed Tools Divider -->
+  <div class="divider fade-in" style="margin-top:8px;">
+    <div class="divider-line"></div>
+    <div class="divider-diamond"></div>
+    <span class="divider-label">Deployed Tools</span>
+    <div class="divider-diamond"></div>
+    <div class="divider-line"></div>
+  </div>
+
+  <!-- Deployed Tools Divider (kept for structure) -->
+  <div class="divider fade-in" style="display:none">
     <div class="divider-line"></div>
     <div class="divider-diamond"></div>
     <span class="divider-label">Deployed Tools</span>
@@ -582,7 +796,7 @@
   <div class="tools-grid">
 
     <!-- Wasteland King Tool -->
-    <a class="tool-card fade-in" href="https://pns-alliance-mgmt-tools.vercel.app/wk-organizer" title="Open Wasteland King Tool">
+    <a class="tool-card fade-in" href="#" title="Open Wasteland King Tool">
       <div class="card-header">
         <div class="card-icon-wrap">
           <!-- Crown icon -->
@@ -608,14 +822,14 @@
       <div class="card-footer">
         <span class="card-status">
           <span class="card-status-dot"></span>
-          In Dev (they suck rn; live links for testing only)
+          In Dev
         </span>
         <span class="card-launch">Launch Tool →</span>
       </div>
     </a>
 
     <!-- PNS State Scout Tool -->
-    <a class="tool-card fade-in" href="https://pns-alliance-mgmt-tools.vercel.app/pns-state-scout" title="Open PNS State Scout Tool">
+    <a class="tool-card fade-in" href="#" title="Open PNS State Scout Tool">
       <div class="card-header">
         <div class="card-icon-wrap">
           <!-- Radar/scope icon -->
@@ -645,7 +859,7 @@
       <div class="card-footer">
         <span class="card-status">
           <span class="card-status-dot"></span>
-          In Dev (they suck rn; live links for testing only)
+          In Dev
         </span>
         <span class="card-launch">Launch Tool →</span>
       </div>
@@ -712,6 +926,121 @@
       }
     });
   });
+
+  // ── Timezone Converter ──
+  // DST rules (US: 2nd Sun Mar - 1st Sun Nov; UK: last Sun Mar - last Sun Oct)
+  function isDST_US(date) {
+    const year = date.getUTCFullYear();
+    // 2nd Sunday of March
+    const march = new Date(Date.UTC(year, 2, 1));
+    const marchDay = march.getUTCDay();
+    const dstStart = new Date(Date.UTC(year, 2, (14 - marchDay) % 7 + 1, 7)); // 2am EST = 7am UTC
+    // 1st Sunday of November
+    const nov = new Date(Date.UTC(year, 10, 1));
+    const novDay = nov.getUTCDay();
+    const dstEnd = new Date(Date.UTC(year, 10, (7 - novDay) % 7 + 1, 6)); // 2am EST = 6am UTC
+    return date >= dstStart && date < dstEnd;
+  }
+
+  function isDST_UK(date) {
+    const year = date.getUTCFullYear();
+    // Last Sunday of March
+    const marchLast = new Date(Date.UTC(year, 3, 0)); // April 0 = March 31
+    marchLast.setUTCDate(marchLast.getUTCDate() - marchLast.getUTCDay());
+    const dstStart = new Date(marchLast.getTime()); dstStart.setUTCHours(1);
+    // Last Sunday of October
+    const octLast = new Date(Date.UTC(year, 10, 0)); // Nov 0 = Oct 31
+    octLast.setUTCDate(octLast.getUTCDate() - octLast.getUTCDay());
+    const dstEnd = new Date(octLast.getTime()); dstEnd.setUTCHours(1);
+    return date >= dstStart && date < dstEnd;
+  }
+
+  function fmtHour(utcHour) {
+    // Normalize to 0-23
+    utcHour = ((utcHour % 24) + 24) % 24;
+    const h12 = utcHour % 12 === 0 ? 12 : utcHour % 12;
+    const ampm = utcHour < 12 ? 'am' : 'pm';
+    return h12 + ampm;
+  }
+
+  function updateTz() {
+    const offset = parseInt(document.getElementById('tz-offset').value);
+    // RESET = UTC 0, meaning the game resets at UTC 00:00
+    // So RESET + offset means the reset happens at UTC hour 0,
+    // which is offset hours after midnight UTC.
+    // We compute what local times correspond to UTC 00:00 adjusted by offset.
+    // Actually: "RESET +1" means the event is 1 hour after reset = UTC 01:00
+    const utcHour = ((offset % 24) + 24) % 24;
+
+    // Use today's date to determine DST status
+    const now = new Date();
+    const refDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), utcHour, 0, 0));
+
+    const usDST = isDST_US(refDate);
+    const ukDST = isDST_UK(refDate);
+
+    // UTC offsets (standard -> DST)
+    // EST: -5 / EDT: -4
+    // CST: -6 / CDT: -5
+    // MST: -7 / MDT: -6
+    // PST: -8 / PDT: -7
+    // UK:   0 / BST: +1
+    const estOff = usDST ? -4 : -5;
+    const cstOff = usDST ? -5 : -6;
+    const mstOff = usDST ? -6 : -7;
+    const pstOff = usDST ? -7 : -8;
+    const ukOff  = ukDST ? 1  : 0;
+
+    const estLabel = usDST ? 'EDT' : 'EST';
+    const cstLabel = usDST ? 'CDT' : 'CST';
+    const mstLabel = usDST ? 'MDT' : 'MST';
+    const pstLabel = usDST ? 'PDT' : 'PST';
+    const ukLabel  = ukDST ? 'BST' : 'GMT';
+
+    const estTime = fmtHour(utcHour + estOff);
+    const cstTime = fmtHour(utcHour + cstOff);
+    const mstTime = fmtHour(utcHour + mstOff);
+    const pstTime = fmtHour(utcHour + pstOff);
+    const ukTime  = fmtHour(utcHour + ukOff);
+
+    const resetLabel = offset === 0 ? 'RESET' : (offset > 0 ? 'RESET +' + offset : 'RESET ' + offset);
+    const outputStr = `@ ${resetLabel} (${estTime} ${estLabel} / ${cstTime} ${cstLabel} / ${mstTime} ${mstLabel} / ${pstTime} ${pstLabel} / ${ukTime} ${ukLabel})`;
+
+    document.getElementById('tz-output').textContent = outputStr;
+
+    // Breakdown pills
+    const bd = document.getElementById('tz-breakdown');
+    const zones = [
+      {label: estLabel, time: estTime},
+      {label: cstLabel, time: cstTime},
+      {label: mstLabel, time: mstTime},
+      {label: pstLabel, time: pstTime},
+      {label: ukLabel,  time: ukTime},
+      {label: 'UTC',    time: fmtHour(utcHour)},
+    ];
+    bd.innerHTML = zones.map(z =>
+      `<div class="qt-tz-pill">${z.label} <span>${z.time}</span></div>`
+    ).join('');
+
+    // Reset copy button
+    const btn = document.getElementById('tz-copy-btn');
+    btn.textContent = 'Copy';
+    btn.classList.remove('copied');
+  }
+
+  function copyTzOutput() {
+    const text = document.getElementById('tz-output').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('tz-copy-btn');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  // Init on load
+  updateTz();
+
 </script>
 
 </body>
