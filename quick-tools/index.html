@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quick Tools — P&S Alliance Suite</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg-base:       #0b0e14;
+      --bg-panel:      #111620;
+      --bg-card:       #161d2b;
+      --bg-card-hover: #1c2538;
+      --border:        #232e44;
+      --border-bright: #2e3f60;
+      --accent-amber:  #f5a623;
+      --accent-red:    #e8415a;
+      --accent-cyan:   #3ecfcf;
+      --accent-green:  #4caf7d;
+      --text-primary:  #dde6f5;
+      --text-secondary:#7a8fac;
+      --text-dim:      #3d4f68;
+      --glow-amber:    0 0 18px #f5a62355;
+      --glow-cyan:     0 0 18px #3ecfcf44;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg-base);
+      color: var(--text-primary);
+      font-family: 'Exo 2', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Background grid ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: .35;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Noise grain ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: .6;
+    }
+
+    /* ── Layout wrapper ── */
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* ── Header ── */
+    header {
+      padding: 48px 0 40px;
+      display: flex;
+      align-items: flex-end;
+      gap: 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 48px;
+    }
+
+    .logo-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .suite-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .25em;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: 1;
+      letter-spacing: .04em;
+      color: var(--text-primary);
+    }
+
+    h1 span {
+      color: var(--accent-amber);
+    }
+
+    .header-meta {
+      margin-left: auto;
+      text-align: right;
+    }
+
+    .game-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border: 1px solid var(--border-bright);
+      border-radius: 4px;
+      background: var(--bg-panel);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      color: var(--text-secondary);
+      letter-spacing: .08em;
+    }
+
+    .game-badge::before {
+      content: '';
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 8px var(--accent-green);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .3; }
+    }
+
+    /* ── Tool sections ── */
+    .tool-section {
+      margin-bottom: 32px;
+      animation: fadeUp .5s ease both;
+    }
+
+    .tool-section:nth-child(1) { animation-delay: .05s; }
+    .tool-section:nth-child(2) { animation-delay: .12s; }
+    .tool-section:nth-child(3) { animation-delay: .19s; }
+    .tool-section:nth-child(4) { animation-delay: .26s; }
+
+    /* ── Section label ── */
+    .section-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .2em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Tool card ── */
+    .tool-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 28px 24px 24px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: background .2s, border-color .2s, transform .2s;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .tool-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--card-accent-a, transparent) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity .3s;
+    }
+
+    .tool-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--card-accent-b, var(--border-bright));
+      transform: translateY(-3px);
+    }
+
+    .tool-card:hover::before { opacity: 1; }
+
+    /* accent stripe */
+    .tool-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--card-accent-b, var(--border-bright)), transparent);
+      border-radius: 8px 8px 0 0;
+    }
+
+    /* ── Card colour themes ── */
+    .card--amber {
+      --card-accent-a: #f5a62308;
+      --card-accent-b: var(--accent-amber);
+    }
+    .card--cyan {
+      --card-accent-a: #3ecfcf08;
+      --card-accent-b: var(--accent-cyan);
+    }
+    .card--red {
+      --card-accent-a: #e8415a08;
+      --card-accent-b: var(--accent-red);
+    }
+    .card--green {
+      --card-accent-a: #4caf7d08;
+      --card-accent-b: var(--accent-green);
+    }
+
+    /* ── Card inner parts ── */
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .card-icon {
+      width: 44px; height: 44px;
+      border-radius: 8px;
+      border: 1px solid var(--card-accent-b, var(--border));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+      background: #0005;
+      transition: box-shadow .3s;
+    }
+
+    .tool-card:hover .card-icon {
+      box-shadow: var(--glow-amber);
+    }
+    .card--cyan:hover .card-icon  { box-shadow: var(--glow-cyan); }
+    .card--red:hover .card-icon   { box-shadow: 0 0 18px #e8415a44; }
+    .card--green:hover .card-icon { box-shadow: 0 0 18px #4caf7d44; }
+
+    .card-badge {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .1em;
+      padding: 3px 8px;
+      border-radius: 3px;
+      background: #ffffff08;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .card-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--card-accent-b, var(--text-secondary));
+      opacity: .8;
+    }
+
+    .card-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 1.35rem;
+      letter-spacing: .03em;
+      line-height: 1.15;
+      color: var(--text-primary);
+    }
+
+    .card-desc {
+      font-size: .85rem;
+      font-weight: 300;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      flex: 1;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 4px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .card-cta {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--card-accent-b, var(--text-secondary));
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: gap .2s;
+    }
+
+    .tool-card:hover .card-cta { gap: 10px; }
+
+    .card-cta .arrow {
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--text-dim);
+    }
+    .status-dot.coming-soon {
+      background: var(--accent-amber);
+      box-shadow: 0 0 6px var(--accent-amber);
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+
+    /* ── Timezone Tool ── */
+    .tz-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tz-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent-amber), transparent);
+      border-radius: 8px 8px 0 0;
+    }
+
+    .tz-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+    }
+
+    .tz-card-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tz-card-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: .04em;
+      color: var(--text-primary);
+    }
+
+    .tz-card-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .1em;
+      padding: 3px 8px;
+      border-radius: 3px;
+      background: #f5a62312;
+      border: 1px solid #f5a62330;
+      color: var(--accent-amber);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .tz-body {
+      padding: 20px 24px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .tz-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .tz-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .tz-select {
+      flex: 1;
+      max-width: 260px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-bright);
+      border-radius: 5px;
+      color: var(--text-primary);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      letter-spacing: .06em;
+      padding: 8px 32px 8px 12px;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237a8fac' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      cursor: pointer;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    .tz-select:focus {
+      outline: none;
+      border-color: var(--accent-amber);
+      box-shadow: 0 0 0 2px #f5a62318;
+    }
+
+    .tz-select option {
+      background: var(--bg-panel);
+      color: var(--text-primary);
+    }
+
+    .tz-output-wrap {
+      display: flex;
+      align-items: stretch;
+      gap: 10px;
+    }
+
+    .tz-output {
+      flex: 1;
+      background: var(--bg-base);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 10px 14px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      letter-spacing: .04em;
+      color: var(--accent-amber);
+      line-height: 1.5;
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      word-break: break-word;
+    }
+
+    .tz-copy-btn {
+      background: #f5a62314;
+      border: 1px solid #f5a62335;
+      border-radius: 5px;
+      color: var(--accent-amber);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 0 16px;
+      cursor: pointer;
+      transition: background .15s, border-color .15s, transform .1s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .tz-copy-btn:hover {
+      background: #f5a62324;
+      border-color: var(--accent-amber);
+    }
+
+    .tz-copy-btn:active { transform: scale(.96); }
+
+    .tz-copy-btn.copied {
+      background: #4caf7d18;
+      border-color: #4caf7d40;
+      color: var(--accent-green);
+    }
+
+
+
+    /* ── Edit Timezones panel ── */
+    .tz-edit-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      cursor: pointer;
+      user-select: none;
+      transition: color .15s;
+      width: fit-content;
+    }
+
+    .tz-edit-toggle:hover { color: var(--text-secondary); }
+
+    .tz-edit-toggle .toggle-arrow {
+      display: inline-block;
+      transition: transform .2s;
+      font-style: normal;
+      font-size: 9px;
+    }
+
+    .tz-edit-toggle.open { color: var(--accent-amber); }
+    .tz-edit-toggle.open .toggle-arrow { transform: rotate(90deg); }
+
+    .tz-edit-panel {
+      display: none;
+      background: var(--bg-base);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px 16px;
+      gap: 8px;
+      flex-direction: column;
+    }
+
+    .tz-edit-panel.open { display: flex; }
+
+    .tz-edit-panel-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 2px;
+    }
+
+    .tz-checkboxes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tz-check-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .tz-check-item input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 14px; height: 14px;
+      border: 1px solid var(--border-bright);
+      border-radius: 3px;
+      background: var(--bg-panel);
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: border-color .15s, background .15s;
+    }
+
+    .tz-check-item input[type="checkbox"]:checked {
+      background: #f5a62322;
+      border-color: var(--accent-amber);
+    }
+
+    .tz-check-item input[type="checkbox"]:checked::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 4px;
+      width: 4px; height: 7px;
+      border: 1.5px solid var(--accent-amber);
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg);
+    }
+
+    .tz-check-item label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .06em;
+      color: var(--text-secondary);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .tz-check-item input:checked + label { color: var(--text-primary); }
+
+    /* ── Local-time lookup row ── */
+    .tz-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 2px 0;
+    }
+
+    .tz-divider-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .tz-divider-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .tz-multi-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .tz-select-sm {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-bright);
+      border-radius: 5px;
+      color: var(--text-primary);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      letter-spacing: .06em;
+      padding: 8px 28px 8px 10px;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237a8fac' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      cursor: pointer;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    .tz-select-sm:focus {
+      outline: none;
+      border-color: var(--accent-amber);
+      box-shadow: 0 0 0 2px #f5a62318;
+    }
+
+    .tz-select-sm option {
+      background: var(--bg-panel);
+      color: var(--text-primary);
+    }
+
+    .tz-output.tz-output--cyan {
+      color: var(--accent-cyan);
+      border-color: #3ecfcf22;
+    }
+
+    /* ── Coming soon cards ── */
+    .tool-card.card--coming-soon {
+      opacity: .35;
+      filter: grayscale(.85);
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    footer p {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: .08em;
+    }
+
+    footer .version {
+      color: var(--accent-cyan);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      header { flex-direction: column; align-items: flex-start; }
+      .header-meta { margin-left: 0; text-align: left; }
+      .card-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+
+    <!-- Header -->
+    <header>
+      <div class="logo-block">
+        <span class="suite-label">PNS Alliance Management Suite</span>
+        <h1>Quick <span>Tools</span></h1>
+      </div>
+      <div class="header-meta">
+        <span class="game-badge">Puzzles &amp; Survival</span>
+      </div>
+    </header>
+
+    <!-- Tool sections -->
+
+    <!-- 1: RESET Timezone Converter -->
+    <section class="tool-section">
+      <p class="section-label">Reset &amp; Scheduling</p>
+      <div class="tz-card">
+        <div class="tz-card-header">
+          <div class="tz-card-header-left">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="9" stroke="#f5a623" stroke-width="1.5"/>
+              <path d="M12 6V12L16 15" stroke="#f5a623" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M3 12H5M19 12H21M12 3V5M12 19V21" stroke="#f5a623" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            <span class="tz-card-title">RESET Timezone Converter</span>
+          </div>
+          <span class="tz-card-tag">RESET</span>
+        </div>
+        <div class="tz-body">
+          <div class="tz-row">
+            <label class="tz-label" for="tz-offset">Reset offset</label>
+            <select id="tz-offset" class="tz-select" onchange="updateTz()">
+              <option value="-12">RESET -12</option>
+              <option value="-11">RESET -11</option>
+              <option value="-10">RESET -10</option>
+              <option value="-9">RESET -9</option>
+              <option value="-8">RESET -8</option>
+              <option value="-7">RESET -7</option>
+              <option value="-6">RESET -6</option>
+              <option value="-5">RESET -5</option>
+              <option value="-4">RESET -4</option>
+              <option value="-3">RESET -3</option>
+              <option value="-2">RESET -2</option>
+              <option value="-1">RESET -1</option>
+              <option value="0" selected>RESET (UTC 0)</option>
+              <option value="1">RESET +1</option>
+              <option value="2">RESET +2</option>
+              <option value="3">RESET +3</option>
+              <option value="4">RESET +4</option>
+              <option value="5">RESET +5</option>
+              <option value="6">RESET +6</option>
+              <option value="7">RESET +7</option>
+              <option value="8">RESET +8</option>
+              <option value="9">RESET +9</option>
+              <option value="10">RESET +10</option>
+              <option value="11">RESET +11</option>
+              <option value="12">RESET +12</option>
+            </select>
+          </div>
+
+          <!-- Edit timezones toggle -->
+          <span class="tz-edit-toggle" id="tz-edit-toggle" onclick="toggleTzEdit()">
+            <i class="toggle-arrow">▶</i> Edit timezones
+          </span>
+
+          <!-- Edit timezones panel -->
+          <div class="tz-edit-panel" id="tz-edit-panel">
+            <span class="tz-edit-panel-label">Select timezones to include in output</span>
+            <div class="tz-checkboxes" id="tz-checkboxes"></div>
+          </div>
+
+          <!-- Divider -->
+          <div class="tz-divider">
+            <span class="tz-divider-line"></span>
+            <span class="tz-divider-label">RESET → Local</span>
+            <span class="tz-divider-line"></span>
+          </div>
+
+          <!-- Main output -->
+          <div class="tz-output-wrap">
+            <div class="tz-output" id="tz-output"></div>
+            <button class="tz-copy-btn" id="tz-copy-btn" onclick="copyTzOutput()">Copy</button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 2: Daily Bulletin Creator -->
+    <section class="tool-section">
+      <p class="section-label">Communications</p>
+      <div class="tool-card card--cyan card--coming-soon" role="button" tabindex="0">
+        <div class="card-header">
+          <div class="card-icon">📋</div>
+          <span class="card-badge">COMMS</span>
+        </div>
+        <span class="card-tag">Bulletin Generator</span>
+        <h2 class="card-title">Daily Bulletin Creator</h2>
+        <p class="card-desc">Build formatted daily bulletins for your alliance chat. Customize schedules, reminders, and announcements — then copy with one click.</p>
+        <div class="card-footer">
+          <span class="card-cta">Coming Soon <span class="arrow">→</span></span>
+          <span class="status-dot coming-soon"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3: ACE/OFF Ace Reminders -->
+    <section class="tool-section">
+      <p class="section-label">Combat Readiness</p>
+      <div class="tool-card card--red card--coming-soon" role="button" tabindex="0">
+        <div class="card-header">
+          <div class="card-icon">⚔️</div>
+          <span class="card-badge">ACE / OFF</span>
+        </div>
+        <span class="card-tag">Ace Reminders</span>
+        <h2 class="card-title">ACE/OFF Ace Reminders</h2>
+        <p class="card-desc">Generate ready-to-post ACE ON and ACE OFF reminder messages, timed around your alliance's battle schedule. Keep members in sync.</p>
+        <div class="card-footer">
+          <span class="card-cta">Coming Soon <span class="arrow">→</span></span>
+          <span class="status-dot coming-soon"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4: Alliance Trial Guide Generator -->
+    <section class="tool-section">
+      <p class="section-label">Strategy &amp; Guides</p>
+      <div class="tool-card card--green card--coming-soon" role="button" tabindex="0">
+        <div class="card-header">
+          <div class="card-icon">🗺️</div>
+          <span class="card-badge">TRIAL</span>
+        </div>
+        <span class="card-tag">Guide Generator</span>
+        <h2 class="card-title">Alliance Trial Guide Generator</h2>
+        <p class="card-desc">Create step-by-step trial guides tailored to your alliance's power level and strategy. Share polished, formatted walkthroughs with your team.</p>
+        <div class="card-footer">
+          <span class="card-cta">Coming Soon <span class="arrow">→</span></span>
+          <span class="status-dot coming-soon"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <p>P&amp;S Alliance Suite — Quick Tools &nbsp;/&nbsp; <span class="version">v0.1.0</span></p>
+      <p>4 tools &nbsp;·&nbsp; All coming soon</p>
+    </footer>
+
+  </div><!-- /.wrapper -->  <script>
+    const ALL_ZONES = [
+      { key: 'EST',  label: 'EST',          offset: -5   },
+      { key: 'CST',  label: 'CST',          offset: -6   },
+      { key: 'MST',  label: 'MST',          offset: -7   },
+      { key: 'PST',  label: 'PST',          offset: -8   },
+      { key: 'AKT',  label: 'AKT (Alaska)', offset: -9   },
+      { key: 'HAW',  label: 'HAW (Hawaii)', offset: -10  },
+      { key: 'UK',   label: 'UK / GMT',     offset:  0   },
+      { key: 'CET',  label: 'CET',          offset:  1   },
+      { key: 'EET',  label: 'EET',          offset:  2   },
+      { key: 'MSK',  label: 'MSK (Moscow)', offset:  3   },
+      { key: 'GST',  label: 'GST (Gulf)',   offset:  4   },
+      { key: 'IST',  label: 'IST (India)',  offset:  5.5 },
+      { key: 'BKK',  label: 'ICT (Bangkok)',offset:  7   },
+      { key: 'CST8', label: 'CST (China)',  offset:  8   },
+      { key: 'JST',  label: 'JST (Japan)',  offset:  9   },
+      { key: 'AEST', label: 'AEST (Sydney)',offset:  10  },
+      { key: 'NZST', label: 'NZST (NZ)',    offset:  12  },
+    ];
+
+    const DEFAULTS = new Set(['EST', 'CST', 'MST', 'PST', 'UK']);
+    let activeZones = new Set(DEFAULTS);
+
+    // ── Helpers ──────────────────────────────────────────
+
+    function resetToUtcHour(resetOffset) {
+      return ((-resetOffset) % 24 + 24) % 24;
+    }
+
+    function fmtDecimalHour(h) {
+      const total = ((h % 24) + 24) % 24;
+      const hr24 = Math.floor(total);
+      const mins = Math.round((total - hr24) * 60);
+      const h12  = hr24 % 12 === 0 ? 12 : hr24 % 12;
+      const ampm = hr24 < 12 ? 'am' : 'pm';
+      const mStr = mins ? `:${String(mins).padStart(2, '0')}` : '';
+      return `${h12}${mStr}${ampm}`;
+    }
+
+    // convert UTC decimal hour → local decimal hour in a zone
+    function utcToLocal(utcHour, zoneOffset) {
+      return ((utcHour + zoneOffset) % 24 + 24) % 24;
+    }
+
+    // ── Checkbox panel ───────────────────────────────────
+
+    function buildCheckboxes() {
+      const wrap = document.getElementById('tz-checkboxes');
+      wrap.innerHTML = '';
+      ALL_ZONES.forEach(z => {
+        const item = document.createElement('div');
+        item.className = 'tz-check-item';
+        item.innerHTML = `
+          <input type="checkbox" id="tzc-${z.key}" ${activeZones.has(z.key) ? 'checked' : ''} onchange="toggleZone('${z.key}')">
+          <label for="tzc-${z.key}">${z.label}</label>
+        `;
+        wrap.appendChild(item);
+      });
+    }
+
+    function toggleZone(key) {
+      if (activeZones.has(key)) activeZones.delete(key);
+      else activeZones.add(key);
+      updateTz();
+    }
+
+    function toggleTzEdit() {
+      const toggle = document.getElementById('tz-edit-toggle');
+      const panel  = document.getElementById('tz-edit-panel');
+      const isOpen = panel.classList.contains('open');
+      toggle.classList.toggle('open', !isOpen);
+      panel.classList.toggle('open', !isOpen);
+    }
+
+    // ── Main output (RESET → Local) ──────────────────────
+
+    function updateTz() {
+      const resetOffset = parseFloat(document.getElementById('tz-offset').value);
+      const utcHour     = resetToUtcHour(resetOffset);
+      const selected    = ALL_ZONES.filter(z => activeZones.has(z.key));
+
+      if (selected.length === 0) {
+        document.getElementById('tz-output').textContent = '@ RESET (no timezones selected)';
+        return;
+      }
+
+      const parts = selected.map(z => {
+        const local = utcToLocal(utcHour, z.offset);
+        return `${fmtDecimalHour(local)} ${z.label.split(' ')[0]}`;
+      });
+      document.getElementById('tz-output').textContent = `@ RESET (${parts.join(' / ')})`;
+    }
+
+    // ── Copy buttons ─────────────────────────────────────
+
+    function copyWithFeedback(text, btnId) {
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById(btnId);
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1800);
+      });
+    }
+
+    function copyTzOutput() { copyWithFeedback(document.getElementById('tz-output').textContent, 'tz-copy-btn'); }
+
+    // ── Init ─────────────────────────────────────────────
+
+    buildCheckboxes();
+    updateTz();
+  </script>
+</body>
+</html>

@@ -727,72 +727,6 @@
 
   </section>
 
-  <!-- Quick Tools Divider -->
-  <div class="divider fade-in">
-    <div class="divider-line"></div>
-    <div class="divider-diamond"></div>
-    <span class="divider-label">Quick Tools</span>
-    <div class="divider-diamond"></div>
-    <div class="divider-line"></div>
-  </div>
-
-  <!-- Quick Tools Section -->
-  <div class="quick-tools-grid">
-
-    <!-- Timezone Tool -->
-    <div class="qt-card fade-in">
-      <div class="qt-card-header">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="9" stroke="#8ab840" stroke-width="1.5"/>
-            <path d="M12 6V12L16 15" stroke="#8ab840" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M3 12H5M19 12H21M12 3V5M12 19V21" stroke="#8ab840" stroke-width="1.2" stroke-linecap="round"/>
-          </svg>
-          <span class="qt-title">Reset Time Converter</span>
-        </div>
-        <span class="qt-tag">Timezone</span>
-      </div>
-      <div class="qt-body">
-        <div class="qt-row">
-          <label class="qt-label" for="tz-offset">Reset offset</label>
-          <select id="tz-offset" class="qt-select" onchange="updateTz()">
-            <option value="-12">RESET -12</option>
-            <option value="-11">RESET -11</option>
-            <option value="-10">RESET -10</option>
-            <option value="-9">RESET -9</option>
-            <option value="-8">RESET -8</option>
-            <option value="-7">RESET -7</option>
-            <option value="-6">RESET -6</option>
-            <option value="-5">RESET -5</option>
-            <option value="-4">RESET -4</option>
-            <option value="-3">RESET -3</option>
-            <option value="-2">RESET -2</option>
-            <option value="-1">RESET -1</option>
-            <option value="0" selected>RESET (UTC 0)</option>
-            <option value="1">RESET +1</option>
-            <option value="2">RESET +2</option>
-            <option value="3">RESET +3</option>
-            <option value="4">RESET +4</option>
-            <option value="5">RESET +5</option>
-            <option value="6">RESET +6</option>
-            <option value="7">RESET +7</option>
-            <option value="8">RESET +8</option>
-            <option value="9">RESET +9</option>
-            <option value="10">RESET +10</option>
-            <option value="11">RESET +11</option>
-            <option value="12">RESET +12</option>
-          </select>
-        </div>
-        <div class="qt-output-wrap">
-          <div class="qt-output" id="tz-output">@ RESET (7pm EST / 6pm CST / 5pm MST / 4pm PST / 12am UK)</div>
-          <button class="qt-copy-btn" id="tz-copy-btn" onclick="copyTzOutput()">Copy</button>
-        </div>
-        <div class="qt-breakdown" id="tz-breakdown"></div>
-      </div>
-    </div>
-
-  </div>
-
   <!-- Deployed Tools Divider -->
   <div class="divider fade-in" style="margin-top:8px;">
     <div class="divider-line"></div>
@@ -814,8 +748,71 @@
   <!-- Tool Cards -->
   <div class="tools-grid">
 
+    <!-- Quick Tools -->
+    <a class="tool-card fade-in" href="https://pns-alliance-mgmt-tools.vercel.app/quick-tools" title="Open Quick Tools">
+      <div class="card-header">
+        <div class="card-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13 2L4.5 13H12L11 22L19.5 11H12L13 2Z" stroke="#8ab840" stroke-width="1.5" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="card-arrow">↗</span>
+      </div>
+      <div class="card-body">
+        <span class="card-code">// TOOL-01 / UTILITIES</span>
+        <div class="card-name">Quick<br>Tools</div>
+        <p class="card-desc">
+          A collection of small utility tools for alliance commanders. Timezone converters, calculators, reference tables, and other fast-access field utilities.
+        </p>
+        <div class="card-tags">
+          <span class="tag accent">Utilities</span>
+          <span class="tag">Reference</span>
+          <span class="tag">Calculators</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-status">
+          <span class="card-status-dot"></span>
+          In Dev
+        </span>
+        <span class="card-launch">Launch Tool →</span>
+      </div>
+    </a>
+
+    <!-- Member Roster Manager -->
+    <div class="tool-card tool-card--disabled">
+      <div class="card-header">
+        <div class="card-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="3" width="8" height="8" rx="0.5" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="13" y="3" width="8" height="8" rx="0.5" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="3" y="13" width="8" height="8" rx="0.5" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="13" y="13" width="8" height="8" rx="0.5" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <span class="card-arrow" style="opacity:0.3;">↗</span>
+      </div>
+      <div class="card-body">
+        <span class="card-code">// TOOL-02 / MANAGEMENT</span>
+        <div class="card-name">Member<br>Roster<br>Manager</div>
+        <p class="card-desc">Main alliance management hub. Upload and manage player information, track member stats, and oversee alliance operations from one place.</p>
+        <div class="card-tags">
+          <span class="tag">Player Data</span>
+          <span class="tag">Management</span>
+          <span class="tag">Dashboard</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-status card-status--ns">
+          <span class="card-status-dot card-status-dot--ns"></span>
+          Not Started
+        </span>
+        <span class="card-launch" style="opacity:0.3;cursor:not-allowed;">Unavailable</span>
+      </div>
+    </div>
+
     <!-- Wasteland King Tool -->
-    <a class="tool-card fade-in" href="https://pns-alliance-mgmt-tools.vercel.app/wk-organizer" title="Open Wasteland King Tool">
+    <a class="tool-card fade-in" href="https://pns-alliance-mgmt-tools.vercel.app/wk-organizer" title="Open Wasteland King Organizer">
       <div class="card-header">
         <div class="card-icon-wrap">
           <!-- Crown icon -->
@@ -827,8 +824,8 @@
         <span class="card-arrow">↗</span>
       </div>
       <div class="card-body">
-        <span class="card-code">// TOOL-01 / COMMANDER</span>
-        <div class="card-name">Wasteland<br>King Tool</div>
+        <span class="card-code">// TOOL-03 / COMMANDER</span>
+        <div class="card-name">Wasteland<br>King Organizer</div>
         <p class="card-desc">
           Track and manage your alliance's top commanders for the Wasteland King event. Monitor power, rank eligible fighters, and strategize your assault.
         </p>
@@ -848,7 +845,7 @@
     </a>
 
     <!-- PNS State Scout Tool -->
-    <a class="tool-card fade-in" href="https://pns-alliance-mgmt-tools.vercel.app/pns-state-scout" title="Open PNS State Scout Tool">
+    <a class="tool-card fade-in" href="https://pns-alliance-mgmt-tools.vercel.app/pns-state-scout" title="Open PNS State Scout">
       <div class="card-header">
         <div class="card-icon-wrap">
           <!-- Radar/scope icon -->
@@ -864,8 +861,8 @@
         <span class="card-arrow">↗</span>
       </div>
       <div class="card-body">
-        <span class="card-code">// TOOL-02 / INTELLIGENCE</span>
-        <div class="card-name">PNS State<br>Scout Tool</div>
+        <span class="card-code">// TOOL-04 / INTELLIGENCE</span>
+        <div class="card-name">PNS State<br>Scout</div>
         <p class="card-desc">
           Scout rival states and compile field intel. Assess power rankings, enemy activity, and threat levels to prepare your alliance for cross-state operations.
         </p>
@@ -886,73 +883,6 @@
 
   </div>
 
-  <!-- Greyed out / Not Started Cards -->
-  <div class="tools-grid" style="margin-top:16px;">
-
-    <!-- Alliance Management Dashboard -->
-    <div class="tool-card tool-card--disabled">
-      <div class="card-header">
-        <div class="card-icon-wrap">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="3" y="3" width="8" height="8" rx="0.5" stroke="currentColor" stroke-width="1.5"/>
-            <rect x="13" y="3" width="8" height="8" rx="0.5" stroke="currentColor" stroke-width="1.5"/>
-            <rect x="3" y="13" width="8" height="8" rx="0.5" stroke="currentColor" stroke-width="1.5"/>
-            <rect x="13" y="13" width="8" height="8" rx="0.5" stroke="currentColor" stroke-width="1.5"/>
-          </svg>
-        </div>
-        <span class="card-arrow" style="opacity:0.3;">↗</span>
-      </div>
-      <div class="card-body">
-        <span class="card-code">// TOOL-03 / MANAGEMENT</span>
-        <div class="card-name">Alliance<br>Management<br>Dashboard</div>
-        <p class="card-desc">Main alliance management hub. Upload and manage player information, track member stats, and oversee alliance operations from one place.</p>
-        <div class="card-tags">
-          <span class="tag">Player Data</span>
-          <span class="tag">Management</span>
-          <span class="tag">Dashboard</span>
-        </div>
-      </div>
-      <div class="card-footer">
-        <span class="card-status card-status--ns">
-          <span class="card-status-dot card-status-dot--ns"></span>
-          Not Started
-        </span>
-        <span class="card-launch" style="opacity:0.3;cursor:not-allowed;">Unavailable</span>
-      </div>
-    </div>
-
-    <!-- Alliance Mail Tool -->
-    <div class="tool-card tool-card--disabled">
-      <div class="card-header">
-        <div class="card-icon-wrap">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="3" y="5" width="18" height="14" rx="0.5" stroke="currentColor" stroke-width="1.5"/>
-            <path d="M3 7L12 13L21 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M8 17H11M13 17H16" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <span class="card-arrow" style="opacity:0.3;">↗</span>
-      </div>
-      <div class="card-body">
-        <span class="card-code">// TOOL-04 / COMMS</span>
-        <div class="card-name">Alliance<br>Mail Tool</div>
-        <p class="card-desc">Compose alliance-wide messages with custom text colors, emojis, and formatting. Generates a ready-to-paste string for the in-game message sender.</p>
-        <div class="card-tags">
-          <span class="tag">Messaging</span>
-          <span class="tag">Formatting</span>
-          <span class="tag">Copy &amp; Paste</span>
-        </div>
-      </div>
-      <div class="card-footer">
-        <span class="card-status card-status--ns">
-          <span class="card-status-dot card-status-dot--ns"></span>
-          Not Started
-        </span>
-        <span class="card-launch" style="opacity:0.3;cursor:not-allowed;">Unavailable</span>
-      </div>
-    </div>
-
-  </div>
 
   <!-- Stats bar -->
   <div class="stats-bar fade-in">
@@ -1014,119 +944,7 @@
     });
   });
 
-  // ── Timezone Converter ──
-  // DST rules (US: 2nd Sun Mar - 1st Sun Nov; UK: last Sun Mar - last Sun Oct)
-  function isDST_US(date) {
-    const year = date.getUTCFullYear();
-    // 2nd Sunday of March
-    const march = new Date(Date.UTC(year, 2, 1));
-    const marchDay = march.getUTCDay();
-    const dstStart = new Date(Date.UTC(year, 2, (14 - marchDay) % 7 + 1, 7)); // 2am EST = 7am UTC
-    // 1st Sunday of November
-    const nov = new Date(Date.UTC(year, 10, 1));
-    const novDay = nov.getUTCDay();
-    const dstEnd = new Date(Date.UTC(year, 10, (7 - novDay) % 7 + 1, 6)); // 2am EST = 6am UTC
-    return date >= dstStart && date < dstEnd;
-  }
 
-  function isDST_UK(date) {
-    const year = date.getUTCFullYear();
-    // Last Sunday of March
-    const marchLast = new Date(Date.UTC(year, 3, 0)); // April 0 = March 31
-    marchLast.setUTCDate(marchLast.getUTCDate() - marchLast.getUTCDay());
-    const dstStart = new Date(marchLast.getTime()); dstStart.setUTCHours(1);
-    // Last Sunday of October
-    const octLast = new Date(Date.UTC(year, 10, 0)); // Nov 0 = Oct 31
-    octLast.setUTCDate(octLast.getUTCDate() - octLast.getUTCDay());
-    const dstEnd = new Date(octLast.getTime()); dstEnd.setUTCHours(1);
-    return date >= dstStart && date < dstEnd;
-  }
-
-  function fmtHour(utcHour) {
-    // Normalize to 0-23
-    utcHour = ((utcHour % 24) + 24) % 24;
-    const h12 = utcHour % 12 === 0 ? 12 : utcHour % 12;
-    const ampm = utcHour < 12 ? 'am' : 'pm';
-    return h12 + ampm;
-  }
-
-  function updateTz() {
-    const offset = parseInt(document.getElementById('tz-offset').value);
-    // RESET = UTC 0, meaning the game resets at UTC 00:00
-    // So RESET + offset means the reset happens at UTC hour 0,
-    // which is offset hours after midnight UTC.
-    // We compute what local times correspond to UTC 00:00 adjusted by offset.
-    // Actually: "RESET +1" means the event is 1 hour after reset = UTC 01:00
-    const utcHour = ((offset % 24) + 24) % 24;
-
-    // Use today's date to determine DST status
-    const now = new Date();
-    const refDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), utcHour, 0, 0));
-
-    const usDST = isDST_US(refDate);
-    const ukDST = isDST_UK(refDate);
-
-    // UTC offsets (standard -> DST)
-    // EST: -5 / EDT: -4
-    // CST: -6 / CDT: -5
-    // MST: -7 / MDT: -6
-    // PST: -8 / PDT: -7
-    // UK:   0 / BST: +1
-    const estOff = usDST ? -4 : -5;
-    const cstOff = usDST ? -5 : -6;
-    const mstOff = usDST ? -6 : -7;
-    const pstOff = usDST ? -7 : -8;
-    const ukOff  = ukDST ? 1  : 0;
-
-    const estLabel = usDST ? 'EDT' : 'EST';
-    const cstLabel = usDST ? 'CDT' : 'CST';
-    const mstLabel = usDST ? 'MDT' : 'MST';
-    const pstLabel = usDST ? 'PDT' : 'PST';
-    const ukLabel  = ukDST ? 'BST' : 'GMT';
-
-    const estTime = fmtHour(utcHour + estOff);
-    const cstTime = fmtHour(utcHour + cstOff);
-    const mstTime = fmtHour(utcHour + mstOff);
-    const pstTime = fmtHour(utcHour + pstOff);
-    const ukTime  = fmtHour(utcHour + ukOff);
-
-    const resetLabel = offset === 0 ? 'RESET' : (offset > 0 ? 'RESET +' + offset : 'RESET ' + offset);
-    const outputStr = `@ ${resetLabel} (${estTime} ${estLabel} / ${cstTime} ${cstLabel} / ${mstTime} ${mstLabel} / ${pstTime} ${pstLabel} / ${ukTime} ${ukLabel})`;
-
-    document.getElementById('tz-output').textContent = outputStr;
-
-    // Breakdown pills
-    const bd = document.getElementById('tz-breakdown');
-    const zones = [
-      {label: estLabel, time: estTime},
-      {label: cstLabel, time: cstTime},
-      {label: mstLabel, time: mstTime},
-      {label: pstLabel, time: pstTime},
-      {label: ukLabel,  time: ukTime},
-      {label: 'UTC',    time: fmtHour(utcHour)},
-    ];
-    bd.innerHTML = zones.map(z =>
-      `<div class="qt-tz-pill">${z.label} <span>${z.time}</span></div>`
-    ).join('');
-
-    // Reset copy button
-    const btn = document.getElementById('tz-copy-btn');
-    btn.textContent = 'Copy';
-    btn.classList.remove('copied');
-  }
-
-  function copyTzOutput() {
-    const text = document.getElementById('tz-output').textContent;
-    navigator.clipboard.writeText(text).then(() => {
-      const btn = document.getElementById('tz-copy-btn');
-      btn.textContent = 'Copied!';
-      btn.classList.add('copied');
-      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
-    });
-  }
-
-  // Init on load
-  updateTz();
 
 </script>
 
