@@ -861,23 +861,23 @@
 
   </div><!-- /.wrapper -->  <script>
     const ALL_ZONES = [
-      { key: 'EST',  label: 'EST',          offset: -5   },
-      { key: 'CST',  label: 'CST',          offset: -6   },
-      { key: 'MST',  label: 'MST',          offset: -7   },
-      { key: 'PST',  label: 'PST',          offset: -8   },
-      { key: 'AKT',  label: 'AKT (Alaska)', offset: -9   },
-      { key: 'HAW',  label: 'HAW (Hawaii)', offset: -10  },
-      { key: 'UK',   label: 'UK / GMT',     offset:  0   },
-      { key: 'CET',  label: 'CET',          offset:  1   },
-      { key: 'EET',  label: 'EET',          offset:  2   },
-      { key: 'MSK',  label: 'MSK (Moscow)', offset:  3   },
-      { key: 'GST',  label: 'GST (Gulf)',   offset:  4   },
-      { key: 'IST',  label: 'IST (India)',  offset:  5.5 },
-      { key: 'BKK',  label: 'ICT (Bangkok)',offset:  7   },
-      { key: 'CST8', label: 'CST (China)',  offset:  8   },
-      { key: 'JST',  label: 'JST (Japan)',  offset:  9   },
-      { key: 'AEST', label: 'AEST (Sydney)',offset:  10  },
-      { key: 'NZST', label: 'NZST (NZ)',    offset:  12  },
+      { key: 'EST',  label: 'EST',          offset: -4   },  // EDT (DST)
+      { key: 'CST',  label: 'CST',          offset: -5   },  // CDT (DST)
+      { key: 'MST',  label: 'MST',          offset: -6   },  // MDT (DST)
+      { key: 'PST',  label: 'PST',          offset: -7   },  // PDT (DST)
+      { key: 'AKT',  label: 'AKT (Alaska)', offset: -8   },  // AKDT (DST)
+      { key: 'HAW',  label: 'HAW (Hawaii)', offset: -10  },  // no DST
+      { key: 'UK',   label: 'UK / GMT',     offset:  1   },  // BST (DST)
+      { key: 'CET',  label: 'CET',          offset:  2   },  // CEST (DST)
+      { key: 'EET',  label: 'EET',          offset:  3   },  // EEST (DST)
+      { key: 'MSK',  label: 'MSK (Moscow)', offset:  3   },  // no DST
+      { key: 'GST',  label: 'GST (Gulf)',   offset:  4   },  // no DST
+      { key: 'IST',  label: 'IST (India)',  offset:  5.5 },  // no DST
+      { key: 'BKK',  label: 'ICT (Bangkok)',offset:  7   },  // no DST
+      { key: 'CST8', label: 'CST (China)',  offset:  8   },  // no DST
+      { key: 'JST',  label: 'JST (Japan)',  offset:  9   },  // no DST
+      { key: 'AEST', label: 'AEST (Sydney)',offset:  10  },  // no DST (Southern Hemisphere winter = AEST)
+      { key: 'NZST', label: 'NZST (NZ)',    offset:  12  },  // no DST (Southern Hemisphere winter)
     ];
 
     const DEFAULTS = new Set(['EST', 'CST', 'MST', 'PST', 'UK']);
@@ -886,7 +886,7 @@
     // ── Helpers ──────────────────────────────────────────
 
     function resetToUtcHour(resetOffset) {
-      return ((-resetOffset) % 24 + 24) % 24;
+      return ((resetOffset) % 24 + 24) % 24;
     }
 
     function fmtDecimalHour(h) {
