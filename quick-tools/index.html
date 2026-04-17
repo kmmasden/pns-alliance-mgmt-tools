@@ -669,6 +669,348 @@
       border-color: #3ecfcf22;
     }
 
+    /* ── Daily Bulletin Card ── */
+    .bl-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bl-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent-cyan), transparent);
+      border-radius: 8px 8px 0 0;
+    }
+
+    .bl-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+    }
+
+    .bl-card-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .bl-card-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: .04em;
+      color: var(--text-primary);
+    }
+
+    .bl-card-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .1em;
+      padding: 3px 8px;
+      border-radius: 3px;
+      background: #3ecfcf12;
+      border: 1px solid #3ecfcf30;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .bl-body {
+      padding: 20px 24px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .bl-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .bl-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .bl-field--grow { flex: 1; min-width: 180px; }
+
+    .bl-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .bl-input {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-bright);
+      border-radius: 5px;
+      color: var(--text-primary);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      letter-spacing: .04em;
+      padding: 8px 12px;
+      transition: border-color .2s, box-shadow .2s;
+      width: 100%;
+    }
+
+    .bl-input--short { width: 90px; }
+
+    .bl-input:focus {
+      outline: none;
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 2px #3ecfcf18;
+    }
+
+    .bl-input::placeholder { color: var(--text-dim); }
+
+    .bl-select {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-bright);
+      border-radius: 5px;
+      color: var(--text-primary);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      letter-spacing: .06em;
+      padding: 8px 28px 8px 10px;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237a8fac' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      cursor: pointer;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    .bl-select:focus {
+      outline: none;
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 2px #3ecfcf18;
+    }
+
+    .bl-select option { background: var(--bg-panel); color: var(--text-primary); }
+
+    .bl-sub-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .bl-add-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      background: #3ecfcf10;
+      border: 1px solid #3ecfcf30;
+      border-radius: 4px;
+      color: var(--accent-cyan);
+      padding: 3px 10px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+
+    .bl-add-btn:hover { background: #3ecfcf20; }
+
+    .bl-subs {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .bl-sub-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .bl-sub-prefix {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      color: var(--text-dim);
+      flex-shrink: 0;
+      width: 16px;
+      text-align: center;
+    }
+
+    .bl-sub-input { flex: 1; }
+
+    .bl-default-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text-dim);
+      padding: 3px 7px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background .15s, color .15s, border-color .15s;
+      white-space: nowrap;
+    }
+
+    .bl-default-btn:hover { border-color: var(--accent-amber); color: var(--accent-amber); }
+    .bl-default-btn.is-default {
+      background: #f5a62316;
+      border-color: #f5a62350;
+      color: var(--accent-amber);
+    }
+
+    .bl-remove-btn {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 11px;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 3px;
+      flex-shrink: 0;
+      transition: color .15s, background .15s;
+    }
+
+    .bl-remove-btn:hover { color: var(--accent-red); background: #e8415a12; }
+
+    /* Output */
+    .bl-output-wrap {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .bl-output {
+      flex: 1;
+      background: var(--bg-base);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 12px 14px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      letter-spacing: .03em;
+      color: var(--accent-cyan);
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin: 0;
+      min-height: 60px;
+    }
+
+    .bl-copy-btn {
+      background: #3ecfcf14;
+      border: 1px solid #3ecfcf35;
+      border-radius: 5px;
+      color: var(--accent-cyan);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: background .15s, border-color .15s, transform .1s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .bl-copy-btn:hover { background: #3ecfcf24; border-color: var(--accent-cyan); }
+    .bl-copy-btn:active { transform: scale(.96); }
+    .bl-copy-btn.copied {
+      background: #4caf7d18;
+      border-color: #4caf7d40;
+      color: var(--accent-green);
+    }
+
+    /* ── Schedule Editor ── */
+    .bl-schedule-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      cursor: pointer;
+      user-select: none;
+      transition: color .15s;
+      width: fit-content;
+    }
+
+    .bl-schedule-toggle:hover { color: var(--text-secondary); }
+    .bl-schedule-toggle.open { color: var(--accent-cyan); }
+
+    .bl-schedule-toggle .toggle-arrow {
+      display: inline-block;
+      transition: transform .2s;
+      font-style: normal;
+      font-size: 9px;
+    }
+
+    .bl-schedule-toggle.open .toggle-arrow { transform: rotate(90deg); }
+
+    .bl-schedule-panel {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      background: var(--bg-base);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px 16px;
+    }
+
+    .bl-schedule-panel.open { display: flex; }
+
+    .bl-schedule-panel-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* Day grid */
+    .bl-sched-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .bl-sched-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .bl-sched-day-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .08em;
+      color: var(--text-secondary);
+      width: 34px;
+      flex-shrink: 0;
+    }
+
+    .bl-sched-input { flex: 1; }
+
+    .bl-sched-offset-sel {
+      width: 90px;
+      flex-shrink: 0;
+      font-size: 11px;
+      padding: 8px 24px 8px 8px;
+    }
+
     /* ── Coming soon cards ── */
     .tool-card.card--coming-soon {
       opacity: .35;
@@ -802,17 +1144,133 @@
     <!-- 2: Daily Bulletin Creator -->
     <section class="tool-section">
       <p class="section-label">Communications</p>
-      <div class="tool-card card--cyan card--coming-soon" role="button" tabindex="0">
-        <div class="card-header">
-          <div class="card-icon">📋</div>
-          <span class="card-badge">COMMS</span>
+      <div class="bl-card">
+        <div class="bl-card-header">
+          <div class="bl-card-header-left">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" y="3" width="16" height="18" rx="2" stroke="#3ecfcf" stroke-width="1.5"/>
+              <path d="M8 8h8M8 12h8M8 16h5" stroke="#3ecfcf" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            <span class="bl-card-title">Daily Bulletin Creator</span>
+          </div>
+          <span class="bl-card-tag">COMMS</span>
         </div>
-        <span class="card-tag">Bulletin Generator</span>
-        <h2 class="card-title">Daily Bulletin Creator</h2>
-        <p class="card-desc">Build formatted daily bulletins for your alliance chat. Customize schedules, reminders, and announcements — then copy with one click.</p>
-        <div class="card-footer">
-          <span class="card-cta">Coming Soon <span class="arrow">→</span></span>
-          <span class="status-dot coming-soon"></span>
+        <div class="bl-body">
+
+          <!-- Row 1: Emoji code + Day -->
+          <div class="bl-row">
+            <div class="bl-field">
+              <label class="bl-label" for="bl-tag">Emoji Code</label>
+              <input id="bl-tag" class="bl-input bl-input--short" type="text" value="#73" maxlength="10" oninput="updateBulletin()">
+            </div>
+            <div class="bl-field">
+              <label class="bl-label" for="bl-day">Day</label>
+              <select id="bl-day" class="bl-select" onchange="onDayChange()">
+                <option value="">— select —</option>
+                <option value="MON">MON</option>
+                <option value="TUE">TUE</option>
+                <option value="WED">WED</option>
+                <option value="THU">THU</option>
+                <option value="FRI">FRI</option>
+                <option value="SAT">SAT</option>
+                <option value="SUN">SUN</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Edit schedule toggle -->
+          <span class="bl-schedule-toggle" id="bl-sched-toggle" onclick="toggleSchedule()">
+            <i class="toggle-arrow">▶</i> Edit weekly schedule
+          </span>
+
+          <!-- Schedule panel -->
+          <div class="bl-schedule-panel" id="bl-schedule-panel">
+            <span class="bl-schedule-panel-label">Set this week's events — selecting a day auto-fills the event and reset offset</span>
+            <div class="bl-sched-grid" id="bl-sched-grid"></div>
+          </div>
+
+          <!-- Row 2: Event name + Reset offset -->
+          <div class="bl-row">
+            <div class="bl-field bl-field--grow">
+              <label class="bl-label" for="bl-event">Event</label>
+              <input id="bl-event" class="bl-input" type="text" placeholder="e.g. Sonic, Alliance Clash, DR and Party" oninput="updateBulletin()">
+            </div>
+            <div class="bl-field">
+              <label class="bl-label" for="bl-offset">Reset offset</label>
+              <select id="bl-offset" class="bl-select" onchange="updateBulletin()">
+                <option value="-12">RESET -12</option>
+                <option value="-11">RESET -11</option>
+                <option value="-10">RESET -10</option>
+                <option value="-9">RESET -9</option>
+                <option value="-8">RESET -8</option>
+                <option value="-7">RESET -7</option>
+                <option value="-6">RESET -6</option>
+                <option value="-5">RESET -5</option>
+                <option value="-4">RESET -4</option>
+                <option value="-3">RESET -3</option>
+                <option value="-2">RESET -2</option>
+                <option value="-1" selected>RESET -1</option>
+                <option value="0">RESET (UTC 0)</option>
+                <option value="1">RESET +1</option>
+                <option value="2">RESET +2</option>
+                <option value="3">RESET +3</option>
+                <option value="4">RESET +4</option>
+                <option value="5">RESET +5</option>
+                <option value="6">RESET +6</option>
+                <option value="7">RESET +7</option>
+                <option value="8">RESET +8</option>
+                <option value="9">RESET +9</option>
+                <option value="10">RESET +10</option>
+                <option value="11">RESET +11</option>
+                <option value="12">RESET +12</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Sub-bullets -->
+          <div class="bl-field">
+            <div class="bl-sub-header">
+              <label class="bl-label">Sub-bullets (↳)</label>
+              <button class="bl-add-btn" onclick="addSubBullet()">+ Add</button>
+            </div>
+            <div id="bl-subs" class="bl-subs">
+              <div class="bl-sub-row">
+                <span class="bl-sub-prefix">↳</span>
+                <input class="bl-input bl-sub-input" type="text" placeholder="HM lairs after" oninput="updateBulletin()">
+                <button class="bl-default-btn" onclick="toggleSubDefault(this)" title="Mark as default — always included">Default</button>
+                <button class="bl-remove-btn" onclick="removeSubBullet(this)">✕</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Reminders -->
+          <div class="bl-field">
+            <div class="bl-sub-header">
+              <label class="bl-label">Reminders</label>
+              <button class="bl-add-btn" onclick="addReminder()">+ Add</button>
+            </div>
+            <div id="bl-reminders" class="bl-subs">
+              <div class="bl-sub-row">
+                <span class="bl-sub-prefix">-</span>
+                <input class="bl-input bl-sub-input" type="text" placeholder="Reminder text..." oninput="updateBulletin()">
+                <button class="bl-remove-btn" onclick="removeReminder(this)">✕</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Divider -->
+          <div class="tz-divider">
+            <span class="tz-divider-line"></span>
+            <span class="tz-divider-label">Preview</span>
+            <span class="tz-divider-line"></span>
+          </div>
+
+          <!-- Output -->
+          <div class="bl-output-wrap">
+            <pre class="bl-output" id="bl-output"></pre>
+            <button class="bl-copy-btn" id="bl-copy-btn" onclick="copyBulletin()">Copy</button>
+          </div>
+
         </div>
       </div>
     </section>
@@ -968,6 +1426,203 @@
     function copyTzOutput() { copyWithFeedback(document.getElementById('tz-output').textContent, 'tz-copy-btn'); }
 
     // ── Init ─────────────────────────────────────────────
+
+    // ── Schedule ──────────────────────────────────────────
+
+    const DAYS = ['MON','TUE','WED','THU','FRI','SAT','SUN'];
+
+    let schedule = {
+      MON: { event: '',             offset: '-1' },
+      TUE: { event: 'Dead Rising',  offset: '-2' },
+      WED: { event: 'Sonic',        offset: '-1' },
+      THU: { event: 'Dead Rising',  offset: '-2' },
+      FRI: { event: 'Water Wars',   offset: '-2' },
+      SAT: { event: 'Valiant Conquest', offset: '-3' },
+      SUN: { event: 'Sonic',        offset: '-1' },
+    };
+
+    function toggleSchedule() {
+      const toggle = document.getElementById('bl-sched-toggle');
+      const panel  = document.getElementById('bl-schedule-panel');
+      const isOpen = panel.classList.contains('open');
+      toggle.classList.toggle('open', !isOpen);
+      panel.classList.toggle('open', !isOpen);
+      if (!isOpen) renderSchedGrid();
+    }
+
+    function makeOffsetOptions(selected) {
+      return Array.from({length: 25}, (_,i) => i - 12).map(n => {
+        const val = String(n);
+        const label = n === 0 ? 'RESET' : n > 0 ? `+${n}` : `${n}`;
+        return `<option value="${val}"${val === String(selected) ? ' selected' : ''}>${label}</option>`;
+      }).join('');
+    }
+
+    function renderSchedGrid() {
+      const grid = document.getElementById('bl-sched-grid');
+      grid.innerHTML = '';
+      DAYS.forEach(day => {
+        const dayData = schedule[day];
+        const row = document.createElement('div');
+        row.className = 'bl-sched-row';
+
+        const label = document.createElement('span');
+        label.className = 'bl-sched-day-label';
+        label.textContent = day;
+
+        const eventInp = document.createElement('input');
+        eventInp.type = 'text';
+        eventInp.className = 'bl-input bl-sched-input';
+        eventInp.placeholder = 'No event';
+        eventInp.value = dayData.event || '';
+        eventInp.oninput = (e) => { schedule[day].event = e.target.value; };
+
+        const offSel = document.createElement('select');
+        offSel.className = 'bl-select bl-sched-offset-sel';
+        offSel.innerHTML = makeOffsetOptions(dayData.offset ?? '-1');
+        offSel.onchange = (e) => { schedule[day].offset = e.target.value; };
+
+        row.appendChild(label);
+        row.appendChild(eventInp);
+        row.appendChild(offSel);
+        grid.appendChild(row);
+      });
+    }
+
+    function onDayChange() {
+      const day = document.getElementById('bl-day').value;
+      if (day) {
+        const dayData = schedule[day];
+        document.getElementById('bl-event').value = dayData.event || '';
+        document.getElementById('bl-offset').value = dayData.offset ?? '-1';
+      }
+      updateBulletin();
+    }
+
+    // ── Daily Bulletin ────────────────────────────────────
+
+    function blResetLabel(offset) {
+      const n = parseFloat(offset);
+      if (n === 0) return 'RESET';
+      return n > 0 ? `RESET +${n}` : `RESET ${n}`;
+    }
+
+    function blTimeString(offset) {
+      // reuse timezone logic from RESET tool
+      const n = parseFloat(offset);
+      const utcHour = ((n) % 24 + 24) % 24;
+      const selected = ALL_ZONES.filter(z => activeZones.has(z.key));
+      if (selected.length === 0) return '';
+      const parts = selected.map(z => {
+        const local = utcToLocal(utcHour, z.offset);
+        return `${fmtDecimalHour(local)} ${z.label.split(' ')[0]}`;
+      });
+      return `@ ${blResetLabel(n)} (${parts.join('/')})`;
+    }
+
+    function getSubBullets() {
+      // returns { defaults: [...], oneoffs: [...] }
+      const rows = [...document.querySelectorAll('#bl-subs .bl-sub-row')];
+      const defaults = [], oneoffs = [];
+      rows.forEach(row => {
+        const val = row.querySelector('.bl-sub-input')?.value.trim();
+        if (!val) return;
+        if (row.querySelector('.bl-default-btn')?.classList.contains('is-default')) {
+          defaults.push(val);
+        } else {
+          oneoffs.push(val);
+        }
+      });
+      return { defaults, oneoffs };
+    }
+
+    function toggleSubDefault(btn) {
+      btn.classList.toggle('is-default');
+      btn.textContent = btn.classList.contains('is-default') ? '★ Default' : 'Default';
+      updateBulletin();
+    }
+
+    function getReminders() {
+      return [...document.querySelectorAll('#bl-reminders .bl-sub-input')]
+        .map(i => i.value.trim()).filter(Boolean);
+    }
+
+    function updateBulletin() {
+      const tag    = document.getElementById('bl-tag').value.trim() || '#??';
+      const day    = document.getElementById('bl-day').value;
+      const event  = document.getElementById('bl-event').value.trim();
+      const offset = document.getElementById('bl-offset').value;
+
+      const timeStr  = blTimeString(offset);
+      const dayPart  = day ? `${day}: ` : '';
+      const eventPart = event || 'Event';
+
+      let lines = [];
+
+      // Header line
+      lines.push(`[${tag}] ${dayPart}${eventPart} ${timeStr}`);
+
+      // Sub-bullets: defaults always first, then one-offs
+      const { defaults, oneoffs } = getSubBullets();
+      [...defaults, ...oneoffs].forEach(s => lines.push(`↳ ${s}`));
+
+      // Blank line then reminders block
+      lines.push('');
+      lines.push(`[${tag}] Reminders`);
+      getReminders().forEach(r => lines.push(`- ${r}`));
+
+      document.getElementById('bl-output').textContent = lines.join('\n');
+    }
+
+    function addSubBullet() {
+      const wrap = document.getElementById('bl-subs');
+      const row  = document.createElement('div');
+      row.className = 'bl-sub-row';
+      row.innerHTML = `
+        <span class="bl-sub-prefix">↳</span>
+        <input class="bl-input bl-sub-input" type="text" placeholder="Add note..." oninput="updateBulletin()">
+        <button class="bl-default-btn" onclick="toggleSubDefault(this)" title="Mark as default — always included">Default</button>
+        <button class="bl-remove-btn" onclick="removeSubBullet(this)">✕</button>
+      `;
+      wrap.appendChild(row);
+      row.querySelector('input').focus();
+    }
+
+    function removeSubBullet(btn) {
+      btn.closest('.bl-sub-row').remove();
+      updateBulletin();
+    }
+
+    function addReminder() {
+      const wrap = document.getElementById('bl-reminders');
+      const row  = document.createElement('div');
+      row.className = 'bl-sub-row';
+      row.innerHTML = `
+        <span class="bl-sub-prefix">-</span>
+        <input class="bl-input bl-sub-input" type="text" placeholder="Reminder text..." oninput="updateBulletin()">
+        <button class="bl-remove-btn" onclick="removeReminder(this)">✕</button>
+      `;
+      wrap.appendChild(row);
+      row.querySelector('input').focus();
+    }
+
+    function removeReminder(btn) {
+      btn.closest('.bl-sub-row').remove();
+      updateBulletin();
+    }
+
+    function copyBulletin() {
+      const text = document.getElementById('bl-output').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('bl-copy-btn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1800);
+      });
+    }
+
+    // Init bulletin
+    updateBulletin();
 
     buildCheckboxes();
     updateTz();
