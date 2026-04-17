@@ -972,6 +972,29 @@
 
     .bl-schedule-panel.open { display: flex; }
 
+    .bl-sched-footer {
+      display: flex;
+      justify-content: flex-end;
+      padding-top: 4px;
+      border-top: 1px solid var(--border);
+    }
+
+    .bl-sched-save-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      background: #3ecfcf14;
+      border: 1px solid #3ecfcf35;
+      border-radius: 4px;
+      color: var(--accent-cyan);
+      padding: 5px 16px;
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+    }
+
+    .bl-sched-save-btn:hover { background: #3ecfcf24; border-color: var(--accent-cyan); }
+
     .bl-schedule-panel-label {
       font-family: 'Share Tech Mono', monospace;
       font-size: 10px;
@@ -1011,6 +1034,33 @@
       padding: 8px 24px 8px 8px;
     }
 
+    /* ── Upcoming Features (bulletin) ── */
+    .bl-upcoming {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .bl-upcoming-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .bl-upcoming-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      flex-shrink: 0;
+    }
+
+    .bl-upcoming-title {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .08em;
+      color: var(--text-dim);
+    }
+
     /* ── Coming soon cards ── */
     .tool-card.card--coming-soon {
       opacity: .35;
@@ -1025,10 +1075,42 @@
       padding-top: 24px;
       border-top: 1px solid var(--border);
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
+      flex-direction: column;
       gap: 12px;
+    }
+
+    .csf-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .csf-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      flex-shrink: 0;
+    }
+
+    .csf-label::after {
+      content: ':';
+    }
+
+    .csf-item {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .06em;
+      color: var(--text-dim);
+      opacity: .7;
+    }
+
+    .csf-divider {
+      color: var(--text-dim);
+      opacity: .4;
+      font-size: 10px;
     }
 
     footer p {
@@ -1047,6 +1129,21 @@
       header { flex-direction: column; align-items: flex-start; }
       .header-meta { margin-left: 0; text-align: left; }
       .card-grid { grid-template-columns: 1fr; }
+
+      .btn-label { display: none; }
+
+      .bl-row { flex-direction: column; }
+      .bl-field, .bl-field--grow { width: 100%; }
+      .bl-input--short { width: 100%; }
+      .bl-row .bl-select { width: 100%; }
+
+      .bl-sched-row { flex-wrap: nowrap; }
+      .bl-sched-input { flex: 1; min-width: 0; }
+      .bl-sched-offset-sel { width: 72px; flex-shrink: 0; font-size: 10px; padding: 8px 18px 8px 6px; }
+
+      .bl-output-wrap { flex-direction: column; }
+      .bl-output { width: 100%; }
+      .bl-copy-btn { width: 100%; padding: 10px; text-align: center; }
     }
   </style>
 </head>
@@ -1187,6 +1284,9 @@
           <div class="bl-schedule-panel" id="bl-schedule-panel">
             <span class="bl-schedule-panel-label">Set this week's events — selecting a day auto-fills the event and reset offset</span>
             <div class="bl-sched-grid" id="bl-sched-grid"></div>
+            <div class="bl-sched-footer">
+              <button class="bl-sched-save-btn" onclick="saveSchedule()">Save</button>
+            </div>
           </div>
 
           <!-- Row 2: Event name + Reset offset -->
@@ -1231,7 +1331,7 @@
           <div class="bl-field">
             <div class="bl-sub-header">
               <label class="bl-label">Sub-bullets (↳)</label>
-              <button class="bl-add-btn" onclick="addSubBullet()">+ Add</button>
+              <button class="bl-add-btn" onclick="addSubBullet()">+ <span class="btn-label">Add</span></button>
             </div>
             <div id="bl-subs" class="bl-subs">
               <div class="bl-sub-row">
@@ -1247,7 +1347,7 @@
           <div class="bl-field">
             <div class="bl-sub-header">
               <label class="bl-label">Reminders</label>
-              <button class="bl-add-btn" onclick="addReminder()">+ Add</button>
+              <button class="bl-add-btn" onclick="addReminder()">+ <span class="btn-label">Add</span></button>
             </div>
             <div id="bl-reminders" class="bl-subs">
               <div class="bl-sub-row">
@@ -1269,6 +1369,24 @@
           <div class="bl-output-wrap">
             <pre class="bl-output" id="bl-output"></pre>
             <button class="bl-copy-btn" id="bl-copy-btn" onclick="copyBulletin()">Copy</button>
+          </div>
+
+          <!-- Upcoming Features -->
+          <div class="tz-divider">
+            <span class="tz-divider-line"></span>
+            <span class="tz-divider-label">Upcoming Features</span>
+            <span class="tz-divider-line"></span>
+          </div>
+
+          <div class="bl-upcoming">
+            <div class="bl-upcoming-item">
+              <span class="bl-upcoming-dot"></span>
+              <span class="bl-upcoming-title">ACE/OFF Reminders</span>
+            </div>
+            <div class="bl-upcoming-item">
+              <span class="bl-upcoming-dot"></span>
+              <span class="bl-upcoming-title">Informational comments section generation</span>
+            </div>
           </div>
 
         </div>
@@ -1313,8 +1431,13 @@
 
     <!-- Footer -->
     <footer>
-      <p>P&amp;S Alliance Suite — Quick Tools &nbsp;/&nbsp; <span class="version">v0.1.0</span></p>
-      <p>4 tools &nbsp;·&nbsp; All coming soon</p>
+      <div class="csf-wrap">
+        <span class="csf-label">Features coming soon</span>
+        <span class="csf-item">ACE/OFF Reminders</span>
+        <span class="csf-divider">·</span>
+        <span class="csf-item">Informational Comment Section Generation</span>
+      </div>
+      <p>PNS Alliance Management Suite — Quick Tools &nbsp;/&nbsp; <span class="version">v0.1.0</span></p>
     </footer>
 
   </div><!-- /.wrapper -->  <script>
@@ -1475,18 +1598,37 @@
         eventInp.className = 'bl-input bl-sched-input';
         eventInp.placeholder = 'No event';
         eventInp.value = dayData.event || '';
-        eventInp.oninput = (e) => { schedule[day].event = e.target.value; };
+        eventInp.oninput = (e) => {
+          schedule[day].event = e.target.value;
+          offSel.style.opacity = e.target.value.trim() ? '' : '0.35';
+          offSel.style.pointerEvents = e.target.value.trim() ? '' : 'none';
+        };
 
         const offSel = document.createElement('select');
         offSel.className = 'bl-select bl-sched-offset-sel';
         offSel.innerHTML = makeOffsetOptions(dayData.offset ?? '-1');
         offSel.onchange = (e) => { schedule[day].offset = e.target.value; };
 
+        if (!dayData.event) {
+          offSel.style.opacity = '0.35';
+          offSel.style.pointerEvents = 'none';
+        }
+
         row.appendChild(label);
         row.appendChild(eventInp);
         row.appendChild(offSel);
         grid.appendChild(row);
       });
+    }
+
+    function saveSchedule() {
+      const day = document.getElementById('bl-day').value;
+      if (day) {
+        document.getElementById('bl-event').value = schedule[day].event || '';
+        document.getElementById('bl-offset').value = schedule[day].offset ?? '-1';
+      }
+      toggleSchedule();
+      updateBulletin();
     }
 
     function onDayChange() {
@@ -1552,24 +1694,34 @@
       const day    = document.getElementById('bl-day').value;
       const event  = document.getElementById('bl-event').value.trim();
       const offset = document.getElementById('bl-offset').value;
+      const noEvent = !event;
 
-      const timeStr  = blTimeString(offset);
-      const dayPart  = day ? `${day}: ` : '';
-      const eventPart = event || 'Event';
+      // Grey out offset when no event
+      const offSel = document.getElementById('bl-offset');
+      offSel.style.opacity = noEvent ? '0.35' : '';
+      offSel.style.pointerEvents = noEvent ? 'none' : '';
 
+      const dayPart = day ? `${day}: ` : '';
       let lines = [];
 
-      // Header line
-      lines.push(`[${tag}] ${dayPart}${eventPart} ${timeStr}`);
+      if (noEvent) {
+        lines.push(`[${tag}] ${dayPart}No Event`);
+      } else {
+        const timeStr = blTimeString(offset);
+        lines.push(`[${tag}] ${dayPart}${event} ${timeStr}`);
 
-      // Sub-bullets: defaults always first, then one-offs
-      const { defaults, oneoffs } = getSubBullets();
-      [...defaults, ...oneoffs].forEach(s => lines.push(`↳ ${s}`));
+        // Sub-bullets: defaults always first, then one-offs
+        const { defaults, oneoffs } = getSubBullets();
+        [...defaults, ...oneoffs].forEach(s => lines.push(`↳ ${s}`));
+      }
 
-      // Blank line then reminders block
-      lines.push('');
-      lines.push(`[${tag}] Reminders`);
-      getReminders().forEach(r => lines.push(`- ${r}`));
+      // Reminders — only if any exist
+      const reminders = getReminders();
+      if (reminders.length > 0) {
+        lines.push('');
+        lines.push(`[${tag}] Reminders`);
+        reminders.forEach(r => lines.push(`- ${r}`));
+      }
 
       document.getElementById('bl-output').textContent = lines.join('\n');
     }
