@@ -1298,6 +1298,7 @@
             <div class="bl-field">
               <label class="bl-label" for="bl-offset">Reset offset</label>
               <select id="bl-offset" class="bl-select" onchange="updateBulletin()">
+                <option value="all-day">All Day</option>
                 <option value="-12">RESET -12</option>
                 <option value="-11">RESET -11</option>
                 <option value="-10">RESET -10</option>
@@ -1574,11 +1575,13 @@
     }
 
     function makeOffsetOptions(selected) {
-      return Array.from({length: 25}, (_,i) => i - 12).map(n => {
+      const allDay = `<option value="all-day"${selected === 'all-day' ? ' selected' : ''}>All Day</option>`;
+      const offsets = Array.from({length: 25}, (_,i) => i - 12).map(n => {
         const val = String(n);
         const label = n === 0 ? 'RESET' : n > 0 ? `+${n}` : `${n}`;
         return `<option value="${val}"${val === String(selected) ? ' selected' : ''}>${label}</option>`;
       }).join('');
+      return allDay + offsets;
     }
 
     function renderSchedGrid() {
@@ -1707,7 +1710,7 @@
       if (noEvent) {
         lines.push(`[${tag}] ${dayPart}No Event`);
       } else {
-        const timeStr = blTimeString(offset);
+        const timeStr = offset === 'all-day' ? '(All Day)' : blTimeString(offset);
         lines.push(`[${tag}] ${dayPart}${event} ${timeStr}`);
 
         // Sub-bullets: defaults always first, then one-offs
