@@ -946,11 +946,12 @@
         return;
       }
 
+      const offsetLabel = resetOffset === 0 ? '' : (resetOffset > 0 ? ` +${resetOffset}` : ` ${resetOffset}`);
       const parts = selected.map(z => {
         const local = utcToLocal(utcHour, z.offset);
         return `${fmtDecimalHour(local)} ${z.label.split(' ')[0]}`;
       });
-      document.getElementById('tz-output').textContent = `@ RESET (${parts.join(' / ')})`;
+      document.getElementById('tz-output').textContent = `@ RESET${offsetLabel} (${parts.join(' / ')})`;
     }
 
     // ── Copy buttons ─────────────────────────────────────
