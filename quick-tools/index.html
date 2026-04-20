@@ -1712,11 +1712,11 @@
       } else {
         const timeStr = offset === 'all-day' ? '(All Day)' : blTimeString(offset);
         lines.push(`[${tag}] ${dayPart}${event} ${timeStr}`);
-
-        // Sub-bullets: defaults always first, then one-offs
-        const { defaults, oneoffs } = getSubBullets();
-        [...defaults, ...oneoffs].forEach(s => lines.push(`↳ ${s}`));
       }
+
+      // Sub-bullets: defaults always first, then one-offs
+      const { defaults, oneoffs } = getSubBullets();
+      [...defaults, ...oneoffs].forEach(s => lines.push(`↳ ${s}`));
 
       // Reminders — only if any exist
       const reminders = getReminders();
