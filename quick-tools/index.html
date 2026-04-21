@@ -884,6 +884,21 @@
 
     .bl-remove-btn:hover { color: var(--accent-red); background: #e8415a12; }
 
+    .bl-drag-handle {
+      color: var(--text-dim);
+      cursor: grab;
+      flex-shrink: 0;
+      font-size: 14px;
+      line-height: 1;
+      user-select: none;
+      padding: 0 2px;
+      transition: color .15s;
+    }
+    .bl-drag-handle:hover { color: var(--text-secondary); }
+    .bl-drag-handle:active { cursor: grabbing; }
+    .bl-sub-row.dragging { opacity: .35; }
+    .bl-sub-row.drag-over { box-shadow: 0 -2px 0 var(--accent-cyan); background: #3ecfcf08; border-radius: 4px; }
+
     /* Output */
     .bl-output-wrap {
       display: flex;
@@ -1351,7 +1366,8 @@
               <button class="bl-add-btn" onclick="addReminder()">+ <span class="btn-label">Add</span></button>
             </div>
             <div id="bl-reminders" class="bl-subs">
-              <div class="bl-sub-row">
+              <div class="bl-sub-row" draggable="true">
+                <span class="bl-drag-handle">⠿</span>
                 <span class="bl-sub-prefix">-</span>
                 <input class="bl-input bl-sub-input" type="text" placeholder="Reminder text..." oninput="updateBulletin()">
                 <button class="bl-remove-btn" onclick="removeReminder(this)">✕</button>
@@ -1556,13 +1572,13 @@
     const DAYS = ['MON','TUE','WED','THU','FRI','SAT','SUN'];
 
     let schedule = {
-      MON: { event: '',             offset: '-1' },
-      TUE: { event: 'Dead Rising',  offset: '-2' },
-      WED: { event: 'Sonic',        offset: '-1' },
-      THU: { event: 'Dead Rising',  offset: '-2' },
-      FRI: { event: 'Water Wars',   offset: '-2' },
-      SAT: { event: 'Valiant Conquest', offset: '-3' },
-      SUN: { event: 'Sonic',        offset: '-1' },
+      MON: { event: '',                 offset: '-1'     },
+      TUE: { event: 'Dead Rising + Party', offset: '-2'     },
+      WED: { event: 'Sonic',               offset: '-2'     },
+      THU: { event: 'Dead Rising + Party', offset: '-2'     },
+      FRI: { event: 'Water Wars',       offset: '-3'     },
+      SAT: { event: 'Valiant Conquest', offset: 'all-day'},
+      SUN: { event: 'Sonic',            offset: '-2'     },
     };
 
     function toggleSchedule() {
@@ -1748,16 +1764,51 @@
       updateBulletin();
     }
 
+    let _dragSrc = null;
+
+    function makeReminderDraggable(row) {
+      row.draggable = true;
+      row.addEventListener('dragstart', e => {
+        _dragSrc = row;
+        row.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      row.addEventListener('dragend', () => {
+        row.classList.remove('dragging');
+        document.querySelectorAll('#bl-reminders .drag-over').forEach(el => el.classList.remove('drag-over'));
+      });
+      row.addEventListener('dragover', e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        document.querySelectorAll('#bl-reminders .drag-over').forEach(el => el.classList.remove('drag-over'));
+        if (row !== _dragSrc) row.classList.add('drag-over');
+      });
+      row.addEventListener('drop', e => {
+        e.stopPropagation();
+        if (_dragSrc && _dragSrc !== row) {
+          const wrap = document.getElementById('bl-reminders');
+          const rows = [...wrap.querySelectorAll('.bl-sub-row')];
+          const srcIdx = rows.indexOf(_dragSrc);
+          const dstIdx = rows.indexOf(row);
+          wrap.insertBefore(_dragSrc, srcIdx < dstIdx ? row.nextSibling : row);
+          updateBulletin();
+        }
+        row.classList.remove('drag-over');
+      });
+    }
+
     function addReminder() {
       const wrap = document.getElementById('bl-reminders');
       const row  = document.createElement('div');
       row.className = 'bl-sub-row';
       row.innerHTML = `
+        <span class="bl-drag-handle">⠿</span>
         <span class="bl-sub-prefix">-</span>
         <input class="bl-input bl-sub-input" type="text" placeholder="Reminder text..." oninput="updateBulletin()">
         <button class="bl-remove-btn" onclick="removeReminder(this)">✕</button>
       `;
       wrap.appendChild(row);
+      makeReminderDraggable(row);
       row.querySelector('input').focus();
     }
 
@@ -1777,6 +1828,7 @@
     }
 
     // Init bulletin
+    document.querySelectorAll('#bl-reminders .bl-sub-row').forEach(makeReminderDraggable);
     updateBulletin();
 
     buildCheckboxes();
