@@ -155,6 +155,12 @@
     align-items: center;
   }
 
+  .toolbar-section {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
   .toolbar-group {
     display: flex;
     align-items: center;
@@ -932,6 +938,17 @@
     header h1 { font-size: 14px; }
     .container { padding: 16px 12px; gap: 16px; }
     .color-dropdown, .emoji-dropdown { width: 280px; }
+    .toolbar {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .toolbar-section {
+      width: 100%;
+    }
+    .toolbar-divider {
+      display: none;
+    }
   }
 </style>
 </head>
@@ -956,56 +973,67 @@
 
     <!-- Toolbar -->
     <div class="toolbar">
-      <span class="toolbar-label">Color</span>
-      <div class="toolbar-group">
-        <div class="color-btn" id="colorBtnWrap">
-          <button id="colorPickerBtn" onclick="toggleColorDropdown()">
-            <div class="color-swatch" id="colorSwatch" style="background:#ffffff"></div>
-            <span id="colorBtnLabel">Default</span>
-            <span>▾</span>
-          </button>
-          <div class="color-dropdown" id="colorDropdown">
-            <div class="color-dropdown-title">Select Color</div>
-            <div class="color-grid" id="colorGrid"></div>
+      <div class="toolbar-section">
+        <span class="toolbar-label">Color</span>
+        <div class="toolbar-group">
+          <div class="color-btn" id="colorBtnWrap">
+            <button id="colorPickerBtn" onclick="toggleColorDropdown()">
+              <div class="color-swatch" id="colorSwatch" style="background:#ffffff"></div>
+              <span id="colorBtnLabel">Default</span>
+              <span>▾</span>
+            </button>
+            <div class="color-dropdown" id="colorDropdown">
+              <div class="color-dropdown-title">Select Color</div>
+              <div class="color-grid" id="colorGrid"></div>
+            </div>
           </div>
         </div>
       </div>
 
       <div class="toolbar-divider"></div>
-      <span class="toolbar-label">Emoji</span>
-      <div class="toolbar-group">
-        <div class="emoji-btn" id="emojiBtnWrap">
-          <button onclick="toggleEmojiDropdown()">😀 Insert Emoji ▾</button>
-          <div class="emoji-dropdown" id="emojiDropdown">
-            <input class="emoji-search" type="text" placeholder="Search emojis..." id="emojiSearch" oninput="filterEmojis()">
-            <div id="emojiList"></div>
+
+      <div class="toolbar-section">
+        <span class="toolbar-label">Emoji</span>
+        <div class="toolbar-group">
+          <div class="emoji-btn" id="emojiBtnWrap">
+            <button onclick="toggleEmojiDropdown()">😀 Insert Emoji ▾</button>
+            <div class="emoji-dropdown" id="emojiDropdown">
+              <input class="emoji-search" type="text" placeholder="Search emojis..." id="emojiSearch" oninput="filterEmojis()">
+              <div id="emojiList"></div>
+            </div>
           </div>
         </div>
       </div>
 
       <div class="toolbar-divider"></div>
-      <span class="toolbar-label">Headers</span>
-      <div class="toolbar-group">
-        <div class="ascii-btn" id="asciiBtnWrap">
-          <button onclick="toggleAsciiDropdown()">▦ Headers ▾</button>
-          <div class="ascii-dropdown" id="asciiDropdown">
-            <div class="ascii-dropdown-title">Insert Header</div>
-            <div id="asciiList"></div>
+
+      <div class="toolbar-section">
+        <span class="toolbar-label">Headers</span>
+        <div class="toolbar-group">
+          <div class="ascii-btn" id="asciiBtnWrap">
+            <button onclick="toggleAsciiDropdown()">▦ Headers ▾</button>
+            <div class="ascii-dropdown" id="asciiDropdown">
+              <div class="ascii-dropdown-title">Insert Header</div>
+              <div id="asciiList"></div>
+            </div>
           </div>
         </div>
       </div>
 
       <div class="toolbar-divider"></div>
-      <span class="toolbar-label">Bullets</span>
-      <div class="toolbar-group">
-        <div class="bullet-btn" id="bulletBtnWrap">
-          <button onclick="toggleBulletDropdown()">• Bullets ▾</button>
-          <div class="bullet-dropdown" id="bulletDropdown">
-            <div class="bullet-dropdown-title">Choose Bullet Style</div>
-            <div class="bullet-section-label">Symbols</div>
-            <div class="bullet-grid" id="bulletSymbolGrid"></div>
-            <div class="bullet-section-label" style="margin-top:8px;">Emoji</div>
-            <div class="bullet-emoji-grid" id="bulletEmojiGrid"></div>
+
+      <div class="toolbar-section">
+        <span class="toolbar-label">Bullets</span>
+        <div class="toolbar-group">
+          <div class="bullet-btn" id="bulletBtnWrap">
+            <button onclick="toggleBulletDropdown()">• Bullets ▾</button>
+            <div class="bullet-dropdown" id="bulletDropdown">
+              <div class="bullet-dropdown-title">Choose Bullet Style</div>
+              <div class="bullet-section-label">Symbols</div>
+              <div class="bullet-grid" id="bulletSymbolGrid"></div>
+              <div class="bullet-section-label" style="margin-top:8px;">Emoji</div>
+              <div class="bullet-emoji-grid" id="bulletEmojiGrid"></div>
+            </div>
           </div>
         </div>
       </div>
