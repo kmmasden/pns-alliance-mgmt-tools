@@ -775,6 +775,14 @@
 
     .bl-input::placeholder { color: var(--text-dim); }
 
+    #bl-event {
+      padding-right: 28px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237a8fac' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      cursor: pointer;
+    }
+
     .bl-select {
       background: var(--bg-panel);
       border: 1px solid var(--border-bright);
@@ -1290,25 +1298,18 @@
             </div>
           </div>
 
-          <!-- Edit schedule toggle -->
-          <span class="bl-schedule-toggle" id="bl-sched-toggle" onclick="toggleSchedule()">
-            <i class="toggle-arrow">▶</i> Edit weekly schedule
-          </span>
-
-          <!-- Schedule panel -->
-          <div class="bl-schedule-panel" id="bl-schedule-panel">
-            <span class="bl-schedule-panel-label">Set this week's events — selecting a day auto-fills the event and reset offset</span>
-            <div class="bl-sched-grid" id="bl-sched-grid"></div>
-            <div class="bl-sched-footer">
-              <button class="bl-sched-save-btn" onclick="saveSchedule()">Save</button>
-            </div>
-          </div>
-
           <!-- Row 2: Event name + Reset offset -->
           <div class="bl-row">
             <div class="bl-field bl-field--grow">
               <label class="bl-label" for="bl-event">Event</label>
-              <input id="bl-event" class="bl-input" type="text" placeholder="e.g. Sonic, Alliance Clash, DR and Party" oninput="updateBulletin()">
+              <input id="bl-event" class="bl-input" type="text" placeholder="Select event from dropdown or manually enter" list="bl-event-list" oninput="updateBulletin()">
+              <datalist id="bl-event-list">
+                <option value="Sonic">
+                <option value="DR + Party">
+                <option value="DoA + Party">
+                <option value="Water Wars">
+                <option value="Tundra Tussle">
+              </datalist>
             </div>
             <div class="bl-field">
               <label class="bl-label" for="bl-offset">Reset offset</label>
@@ -1353,7 +1354,6 @@
               <div class="bl-sub-row">
                 <span class="bl-sub-prefix">↳</span>
                 <input class="bl-input bl-sub-input" type="text" placeholder="HM lairs after" oninput="updateBulletin()">
-                <button class="bl-default-btn" onclick="toggleSubDefault(this)" title="Mark as default — always included">Default</button>
                 <button class="bl-remove-btn" onclick="removeSubBullet(this)">✕</button>
               </div>
             </div>
@@ -1651,12 +1651,6 @@
     }
 
     function onDayChange() {
-      const day = document.getElementById('bl-day').value;
-      if (day) {
-        const dayData = schedule[day];
-        document.getElementById('bl-event').value = dayData.event || '';
-        document.getElementById('bl-offset').value = dayData.offset ?? '-1';
-      }
       updateBulletin();
     }
 
